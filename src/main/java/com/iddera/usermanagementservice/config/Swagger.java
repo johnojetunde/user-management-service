@@ -3,6 +3,8 @@ package com.iddera.usermanagementservice.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -13,6 +15,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static java.util.Collections.singletonList;
 
@@ -27,9 +30,10 @@ public class Swagger {
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.iderra.usermanagementservice"))
+                .apis(RequestHandlerSelectors.basePackage("com.iddera.usermanagementservice"))
                 .paths(PathSelectors.any())
                 .build()
+                .ignoredParameterTypes(CompletableFuture.class, Pageable.class, Sort.class)
                 .apiInfo(apiEndPointsInfo())
                 .securitySchemes(singletonList(securitySchema()));
     }

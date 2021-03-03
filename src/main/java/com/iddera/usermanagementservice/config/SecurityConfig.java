@@ -65,11 +65,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
     @Value("${resource.id}")
     private String resourceId;
 
-//    @Bean
-//    @Override
-//    protected AuthenticationManager authenticationManager() throws Exception {
-//        return super.authenticationManager();
-//    }
+
 
     @Bean
     public PasswordEncoder encoder(){
@@ -78,19 +74,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-//        http
-//                .sessionManagement()
-//                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-//                .maximumSessions(1)
-//                .maxSessionsPreventsLogin(false)
-//                .sessionRegistry(sessionRegistry()).and()
-//                .sessionAuthenticationStrategy(ogrisConcurrentSessions())
-//                .and()
-//                .httpBasic()
-//                .realmName(securityRealm)
-//                .and()
-//                .csrf()
-//                .disable();
         http.authorizeRequests()
                 .anyRequest()
                 .permitAll()
@@ -165,8 +148,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
     public SessionRegistry sessionRegistry() {
         return new SessionRegistryImpl();
     }
-
-
 
     @Bean
     public HttpSessionListener httpSessionListener() {

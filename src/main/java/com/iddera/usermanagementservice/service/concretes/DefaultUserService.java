@@ -155,7 +155,6 @@ public class DefaultUserService implements UserService, UserServiceRepo {
                                 () -> handleCreateNotFoundException("User not found", username)));
     }
 
-
     @Override
     @Transactional
     public CompletableFuture<UserModel> changePassword(Long userId, ChangeUserPasswordRequest request) {
@@ -177,7 +176,7 @@ public class DefaultUserService implements UserService, UserServiceRepo {
 
     @Override
     public CompletableFuture<UserModel> verifyUser(UserVerificationRequest userVerificationRequest) {
-        User user = userRepository.findByUsername(userVerificationRequest.getUsername()).orElseThrow(() -> handleCreateNotFoundException("User %s not found",userVerificationRequest.getUsername()));
+        User user = userRepository.findByUsername(userVerificationRequest.getUsername()).orElseThrow(() -> handleCreateNotFoundException("User %s not found", userVerificationRequest.getUsername()));
         UserActivationToken userActivationToken = userActivationTokenRepository
                 .findByUsername(
                         userVerificationRequest.getUsername());
@@ -185,7 +184,7 @@ public class DefaultUserService implements UserService, UserServiceRepo {
             createActivationTokenForUser(userVerificationRequest.getUsername());
             throw handleCreateBadRequest("This username is not mapped to this activation token");
         }
-        if(!userVerificationRequest.getToken().contentEquals(userActivationToken.getActivationToken()))
+        if (!userVerificationRequest.getToken().contentEquals(userActivationToken.getActivationToken()))
             throw handleCreateBadRequest("This token isn't mapped to the user");
         user.setStatus(EntityStatus.ACTIVE);
         userRepository.save(user);

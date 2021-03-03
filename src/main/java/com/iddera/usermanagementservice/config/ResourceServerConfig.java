@@ -26,22 +26,6 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     }
 
     public void configure(HttpSecurity httpSecurity) throws Exception {
-//        httpSecurity
-//                .requestMatchers()
-//                .and()
-//                .authorizeRequests()
-//                .antMatchers(
-//                        "/actuator/**",
-//                        "/v2/api-docs/**",
-//                        "/swagger**",
-//                        "/swagger-resources/**",
-//                        "/webjars/**")
-//                .permitAll()
-//                .antMatchers(HttpMethod.POST,"/users","/companies")
-//                .permitAll()
-//                .antMatchers(HttpMethod.GET, "/security-questions/**")
-//                .permitAll()
-//                .anyRequest().authenticated();
         httpSecurity.authorizeRequests()
                 .anyRequest()
                 .permitAll()
