@@ -18,8 +18,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
@@ -28,27 +26,19 @@ import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenCo
 import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
-import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
-import javax.servlet.http.HttpSessionListener;
 
 @Configuration
 @EnableWebSecurity
 @EnableRedisRepositories(basePackageClasses = UserActivationToken.class)
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class SecurityConfig extends WebSecurityConfigurerAdapter{
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Value("${security.signing-key}")
     private String signingKey;
-
-    @Value("${security.encoding-strength}")
-    private Integer encodingStrength;
-
-    @Value("${security.security-realm}")
-    private String securityRealm;
 
     @Value("${redis.host}")
     private String redisHost;
@@ -62,13 +52,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
     @Value("${redis.password:#{null}}")
     private String redisPassword;
 
-    @Value("${resource.id}")
-    private String resourceId;
-
-
-
     @Bean
-    public PasswordEncoder encoder(){
+    public PasswordEncoder encoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -117,7 +102,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
     public JedisConnectionFactory jedisConnectionFactory() {
         var redisStandaloneConfiguration = new RedisStandaloneConfiguration(redisHost, redisPort);
         redisStandaloneConfiguration.setDatabase(redisDatabase);
-        if(!Strings.isNullOrEmpty(redisPassword)){
+        if (!Strings.isNullOrEmpty(redisPassword)) {
             redisStandaloneConfiguration.setPassword(RedisPassword.of(redisPassword));
         }
         return new JedisConnectionFactory(redisStandaloneConfiguration);
@@ -129,7 +114,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
         template.setConnectionFactory(jedisConnectionFactory());
         return template;
     }
-
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -143,20 +127,4 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
-
-    @Bean
-    public SessionRegistry sessionRegistry() {
-        return new SessionRegistryImpl();
-    }
-
-    @Bean
-    public HttpSessionListener httpSessionListener() {
-        return new SessionListener();
-    }
-
-    @Bean
-    public HttpSessionEventPublisher httpSessionEventPublisher() {
-        return new HttpSessionEventPublisher();
-    }
-
 }

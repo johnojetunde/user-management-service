@@ -19,9 +19,8 @@ import com.iddera.usermanagementservice.service.abstracts.TokenGenerationService
 import com.iddera.usermanagementservice.service.concretes.DefaultUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -29,17 +28,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
-import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
-import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -49,7 +44,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
-@ExtendWith(MockitoExtension.class)
 class DefaultUserServiceTest {
     @Mock
     private UserRepository userRepository;
@@ -71,6 +65,7 @@ class DefaultUserServiceTest {
 
     @BeforeEach
     void setUp() {
+        MockitoAnnotations.openMocks(this);
         userService = new DefaultUserService(
                 userRepository,
                 roleRepository,
@@ -422,7 +417,7 @@ class DefaultUserServiceTest {
                 .setLastName("Lastname")
                 .setUsername("iddera")
                 .setEmail("email@email.com")
-                .setDateOfBirth(new Date())
+                .setDateOfBirth(LocalDateTime.now())
                 .setType(UserType.ADMIN)
                 .setPassword("iddera")
                 .setRoles(singletonList(role()));
@@ -447,7 +442,7 @@ class DefaultUserServiceTest {
                 .setLastName("Lastname")
                 .setUsername("iddera")
                 .setEmail("email@email.com")
-                .setDateOfBirth(new Date())
+                .setDateOfBirth(LocalDateTime.now())
                 .setRoleId(1L)
                 .setType(UserType.ADMIN)
                 .setPassword("iddera")
@@ -466,7 +461,7 @@ class DefaultUserServiceTest {
                 .setLastName("Lastname")
                 .setUsername("iddera")
                 .setEmail("email@email.com")
-                .setDateOfBirth(new Date())
+                .setDateOfBirth(LocalDateTime.now())
                 .setRoleId(1L)
                 .setType(UserType.ADMIN);
     }

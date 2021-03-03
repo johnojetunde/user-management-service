@@ -41,7 +41,7 @@ public class UserController {
                 .thenApply(ResponseModel::new);
     }
 
-    @PutMapping("/{id}/change-password")
+    @PostMapping("/{id}/change-password")
     @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
     public CompletableFuture<ResponseModel> changePassword(@PathVariable Long id, @Valid @RequestBody ChangeUserPasswordRequest changeUserPasswordRequest) {
         return userService.changePassword(id,changeUserPasswordRequest)

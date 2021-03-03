@@ -36,9 +36,19 @@ logging:
     root: INFO
   file:
     name: iddera-user-mgt-service.log
-    max-size: 50MB
+  logback:
+    rollingpolicy:
+      max-file-size: 50MB
 swagger-auth-link: ${SWAGGER_AUTH_LINK:http://127.0.0.1:8080}
 
 notification-client-url: 'https://iddera-notification-api.herokuapp.com/'
 user-activation-url: 'localhost:8080/users/verify-email'
+
+iddera:
+  client:
+    notification-url: 'https://iddera-notification-api.herokuapp.com/'
+    read-time-out: 40
+    write-time-out: 40
+    connection-time-out: 300
+
 

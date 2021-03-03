@@ -9,8 +9,7 @@ import lombok.experimental.Accessors;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @Accessors(chain = true)
@@ -26,7 +25,7 @@ public class UserUpdateRequest {
     @NotBlank(message = "Username is required")
     private String username;
     @NotNull
-    private Date dateOfBirth;
+    private LocalDateTime dateOfBirth;
     @NotNull
     private UserType type;
     @NotNull

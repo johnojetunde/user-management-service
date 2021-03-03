@@ -12,7 +12,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @Accessors(chain = true)
@@ -32,8 +32,8 @@ public class UserRequest {
     @NotBlank(message = "Username is required")
     private String username;
     @NotNull
-    @JsonFormat(pattern="yyyy-MM-dd")
-    private Date dateOfBirth;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDateTime dateOfBirth;
     @NotNull
     private UserType type;
     @NotNull

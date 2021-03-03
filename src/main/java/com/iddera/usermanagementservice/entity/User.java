@@ -10,7 +10,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Set;
 
 import static com.iddera.usermanagementservice.util.FunctionUtil.emptyIfNullStream;
@@ -34,7 +33,7 @@ public class User extends BaseEntity {
     private String password;
     @Enumerated(EnumType.STRING)
     private Gender gender;
-    private Date dateOfBirth;
+    private LocalDateTime dateOfBirth;
     @Enumerated(EnumType.STRING)
     private UserType type;
     private LocalDateTime lastLoginDate;
