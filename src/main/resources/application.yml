@@ -1,0 +1,54 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DATABASE_URL:localhost:3306/user_management_db?createDatabaseIfNotExist=true&serverTimezone=UTC}
+    username: ${DATABASE_USERNAME:root}
+    password: ${DATABASE_PASSWORD:password}
+    maxConnections: 10
+
+    jpa:
+      show-sql: true
+      hibernate:
+        ddl-auto: none
+      dialect: org.hibernate.dialect.MySQL5Dialect
+      generate-ddl: false
+      properties:
+        hibernate:
+          format_sql: true
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changeLog-master.xml
+redis:
+  host: ${REDIS_HOST:localhost}
+  port: ${REDIS_PORT:6379}
+  password: ${REDIS_PASSWORD:}
+security:
+  signing-key: MaYzkSjmkzPC57L
+  encoding-strength: 256
+  security-realm: Iddera
+resource:
+  id: iddera_service
+logging:
+  level:
+    root: INFO
+  file:
+    name: iddera-user-mgt-service.log
+  logback:
+    rollingpolicy:
+      max-file-size: 50MB
+swagger-auth-link: ${SWAGGER_AUTH_LINK:http://127.0.0.1:8080}
+
+notification-client-url: 'https://iddera-notification-api.herokuapp.com/'
+user-activation-url: 'localhost:8080/users/verify-email'
+
+iddera:
+  client:
+    notification-url: 'https://iddera-notification-api.herokuapp.com/'
+    read-time-out: 40
+    write-time-out: 40
+    connection-time-out: 300
+
+
