@@ -9,8 +9,8 @@
             <configuration>
                 <httpHeaders>
                     <property>
-                        <name>Job-Token</name>
-                        <value>${env.CI_JOB_TOKEN}</value>
+                        <name>Deploy-Token</name>
+                        <value>${env.DEPLOY_TOKEN}</value>
                     </property>
                 </httpHeaders>
             </configuration>
