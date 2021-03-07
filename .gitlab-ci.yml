@@ -28,6 +28,6 @@ deploy-staging:
     - apt-get update -yq
     - apt-get install -y ruby-dev
     - gem install dpl
-    - dpl --provider=heroku --app=iddera-user-management-service --api-key=$HEROKU_API_KEY
+    - dpl --provider=heroku --app=iddera-user-management-api --api-key=$HEROKU_API_KEY
   only:
     - staging

@@ -57,7 +57,7 @@ public class DefaultUserService implements UserService, UserServiceRepo {
                               EmailService emailService,
                               UserActivationTokenRepository userActivationTokenRepository,
                               TokenGenerationService tokenGenerationService,
-                              @Value("${notification-client-url: http://localhost:8080/users/verify-email}") String activationUrl,
+                              @Value("${user-activation-url: http://localhost:8080/users/verify-email}") String activationUrl,
                               UserManagementExceptionService exceptions) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
