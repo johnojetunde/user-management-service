@@ -30,7 +30,7 @@ public class Swagger {
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.iddera.usermanagementservice"))
+                .apis(RequestHandlerSelectors.basePackage("com.iddera.usermanagement"))
                 .paths(PathSelectors.any())
                 .build()
                 .ignoredParameterTypes(CompletableFuture.class, Pageable.class, Sort.class)
