@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -18,7 +19,7 @@ public class UserModel {
     private String email;
     private String username;
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDateTime dateOfBirth;
+    private LocalDate dateOfBirth;
     private UserType type;
     private Gender gender;
     private LocalDateTime lastLoginDate;

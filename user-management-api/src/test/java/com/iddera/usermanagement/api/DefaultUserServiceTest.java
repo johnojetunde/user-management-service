@@ -29,7 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -416,7 +416,7 @@ class DefaultUserServiceTest {
                 .setLastName("Lastname")
                 .setUsername("iddera")
                 .setEmail("email@email.com")
-                .setDateOfBirth(LocalDateTime.now())
+                .setDateOfBirth(LocalDate.now())
                 .setType(UserType.ADMIN)
                 .setPassword("iddera")
                 .setRoles(singletonList(role()));
@@ -442,7 +442,7 @@ class DefaultUserServiceTest {
                 .setLastName("Lastname")
                 .setUsername("iddera")
                 .setEmail("email@email.com")
-                .setDateOfBirth(LocalDateTime.now())
+                .setDateOfBirth(LocalDate.now())
                 .setRoleId(1L)
                 .setType(UserType.ADMIN)
                 .setPassword("iddera")
@@ -456,7 +456,7 @@ class DefaultUserServiceTest {
                 .setLastName("Lastname")
                 .setUsername("iddera")
                 .setEmail("email@email.com")
-                .setDateOfBirth(LocalDateTime.now())
+                .setDateOfBirth(LocalDate.now())
                 .setRoleId(1L)
                 .setType(UserType.ADMIN);
     }

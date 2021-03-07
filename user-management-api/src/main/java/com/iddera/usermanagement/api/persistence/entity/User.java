@@ -8,6 +8,7 @@ import lombok.experimental.Accessors;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
@@ -33,7 +34,7 @@ public class User extends BaseEntity {
     private String password;
     @Enumerated(EnumType.STRING)
     private Gender gender;
-    private LocalDateTime dateOfBirth;
+    private LocalDate dateOfBirth;
     @Enumerated(EnumType.STRING)
     private UserType type;
     private LocalDateTime lastLoginDate;
