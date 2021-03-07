@@ -1,0 +1,33 @@
+stages:
+  - build
+  - deploy
+  - deploy-staging
+
+build:
+  stage: build
+  image: maven:3.6-jdk-11
+  script:
+    - 'mvn package -s ci_settings.xml'
+  tags:
+    - docker
+  except:
+    - staging
+
+
+deploy:
+  stage: deploy
+  image: maven:3.6-jdk-11
+  script:
+    - 'mvn deploy -s ci_settings.xml'
+  only:
+    - master
+
+deploy-staging:
+  stage: deploy-staging
+  script:
+    - apt-get update -yq
+    - apt-get install -y ruby-dev
+    - gem install dpl
+    - dpl --provider=heroku --app=iddera-user-management-service --api-key=$HEROKU_API_KEY
+  only:
+    - staging
