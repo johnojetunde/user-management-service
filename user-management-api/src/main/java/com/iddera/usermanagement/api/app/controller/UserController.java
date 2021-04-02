@@ -5,6 +5,7 @@ import com.iddera.usermanagement.api.app.model.ResponseModel;
 import com.iddera.usermanagement.api.app.model.UserResult;
 import com.iddera.usermanagement.api.domain.service.abstracts.UserService;
 import com.iddera.usermanagement.lib.app.request.ChangeUserPasswordRequest;
+import com.iddera.usermanagement.lib.app.request.ForgotPasswordRequest;
 import com.iddera.usermanagement.lib.app.request.UserRequest;
 import com.iddera.usermanagement.lib.app.request.UserVerificationRequest;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
@@ -16,6 +17,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -29,8 +31,8 @@ public class UserController {
 
     @PostMapping(consumes = APPLICATION_JSON_VALUE)
     @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
-    public CompletableFuture<ResponseModel> create(@Valid @RequestBody UserRequest request) {
-        return userService.create(request)
+    public CompletableFuture<ResponseModel> create(@Valid @RequestBody UserRequest request, Locale locale) {
+        return userService.create(request,locale )
                 .thenApply(ResponseModel::new);
     }
 
@@ -45,6 +47,20 @@ public class UserController {
     @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
     public CompletableFuture<ResponseModel> changePassword(@PathVariable Long id, @Valid @RequestBody ChangeUserPasswordRequest changeUserPasswordRequest) {
         return userService.changePassword(id,changeUserPasswordRequest)
+                .thenApply(ResponseModel::new);
+    }
+
+    @PostMapping("/{username}/forgot-password")
+    @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
+    public CompletableFuture<ResponseModel> changePassword(@PathVariable String username, Locale locale) {
+        return userService.forgotPassword(username,locale)
+                .thenApply(ResponseModel::new);
+    }
+
+    @PostMapping("/{id}/reset-password")
+    @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
+    public CompletableFuture<ResponseModel> changePassword(@PathVariable Long id, @Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest, Locale locale) {
+        return userService.resetPassword(id,forgotPasswordRequest,locale)
                 .thenApply(ResponseModel::new);
     }
 

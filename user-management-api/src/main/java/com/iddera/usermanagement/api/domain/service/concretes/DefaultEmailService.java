@@ -26,7 +26,7 @@ public class DefaultEmailService implements EmailService {
         UUID uuid = UUID.randomUUID();
         var request = EmailRequestModel.builder()
                 .body(body)
-                .bodyType(EmailBodyType.TEXT)
+                .bodyType(EmailBodyType.HTML)
                 .sender(sender)
                 .referenceId(uuid.toString())
                 .subject(subject)

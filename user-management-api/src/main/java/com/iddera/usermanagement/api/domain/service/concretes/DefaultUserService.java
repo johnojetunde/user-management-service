@@ -2,31 +2,33 @@ package com.iddera.usermanagement.api.domain.service.concretes;
 
 
 import com.iddera.commons.utils.ValidationUtil;
+import com.iddera.usermanagement.api.app.util.Constants;
 import com.iddera.usermanagement.api.domain.exception.UserManagementExceptionService;
 import com.iddera.usermanagement.api.domain.service.abstracts.EmailService;
+import com.iddera.usermanagement.api.domain.service.abstracts.MailContentBuilder;
 import com.iddera.usermanagement.api.domain.service.abstracts.TokenGenerationService;
 import com.iddera.usermanagement.api.domain.service.abstracts.UserService;
 import com.iddera.usermanagement.api.persistence.entity.Role;
 import com.iddera.usermanagement.api.persistence.entity.User;
 import com.iddera.usermanagement.api.persistence.entity.UserActivationToken;
+import com.iddera.usermanagement.api.persistence.entity.UserForgotPasswordToken;
 import com.iddera.usermanagement.api.persistence.repository.RoleRepository;
 import com.iddera.usermanagement.api.persistence.repository.UserRepository;
 import com.iddera.usermanagement.api.persistence.repository.UserServiceRepo;
 import com.iddera.usermanagement.api.persistence.repository.redis.UserActivationTokenRepository;
-import com.iddera.usermanagement.lib.app.request.ChangeUserPasswordRequest;
-import com.iddera.usermanagement.lib.app.request.UserRequest;
-import com.iddera.usermanagement.lib.app.request.UserUpdateRequest;
-import com.iddera.usermanagement.lib.app.request.UserVerificationRequest;
+import com.iddera.usermanagement.api.persistence.repository.redis.UserForgotPasswordTokenRepository;
+import com.iddera.usermanagement.lib.app.request.*;
 import com.iddera.usermanagement.lib.domain.model.EntityStatus;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
@@ -47,8 +49,9 @@ public class DefaultUserService implements UserService, UserServiceRepo {
     private final EmailService emailService;
     private final UserActivationTokenRepository userActivationTokenRepository;
     private final TokenGenerationService tokenGenerationService;
-    private final String activationUrl;
+    private final UserForgotPasswordTokenRepository userForgotPasswordTokenRepository;
     private final UserManagementExceptionService exceptions;
+    private final MailContentBuilder mailContentBuilder;
 
     public DefaultUserService(UserRepository userRepository,
                               RoleRepository roleRepository,
@@ -57,8 +60,9 @@ public class DefaultUserService implements UserService, UserServiceRepo {
                               EmailService emailService,
                               UserActivationTokenRepository userActivationTokenRepository,
                               TokenGenerationService tokenGenerationService,
-                              @Value("${user-activation-url: http://localhost:8080/users/verify-email}") String activationUrl,
-                              UserManagementExceptionService exceptions) {
+                              UserForgotPasswordTokenRepository userForgotPasswordTokenRepository,
+                              UserManagementExceptionService exceptions,
+                              MailContentBuilder mailContentBuilder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.executor = executor;
@@ -66,18 +70,19 @@ public class DefaultUserService implements UserService, UserServiceRepo {
         this.emailService = emailService;
         this.userActivationTokenRepository = userActivationTokenRepository;
         this.tokenGenerationService = tokenGenerationService;
-        this.activationUrl = activationUrl;
+        this.userForgotPasswordTokenRepository = userForgotPasswordTokenRepository;
         this.exceptions = exceptions;
+        this.mailContentBuilder = mailContentBuilder;
     }
 
     @Override
-    public CompletableFuture<UserModel> create(UserRequest request) {
-        return createEntity(request).thenApply(User::toModel);
+    public CompletableFuture<UserModel> create(UserRequest request, Locale locale) {
+        return createEntity(request, locale).thenApply(User::toModel);
     }
 
     @Transactional
     @Override
-    public CompletableFuture<User> createEntity(UserRequest request) {
+    public CompletableFuture<User> createEntity(UserRequest request, Locale locale) {
         return supplyAsync(() -> {
             ensureUserNameIsUnique(request.getUsername());
             ensureEmailIsUnique(request.getEmail());
@@ -97,8 +102,8 @@ public class DefaultUserService implements UserService, UserServiceRepo {
 
             User savedUser = userRepository.save(user);
             String token = createActivationTokenForUser(user.getUsername());
-            emailService.sendEmailToOneAddress(String.format("You've successfully created your user with username: %s %n Click on the link to activate your user %s?tkn=%s",
-                    user.getUsername(), activationUrl, token),
+            String emailHtml = buildNewUserWelcomeMail(user.getUsername(), token, locale);
+            emailService.sendEmailToOneAddress(emailHtml,
                     "Welcome to Iddera",
                     user.getEmail(),
                     "notificaiton@iddera.com");
@@ -155,6 +160,24 @@ public class DefaultUserService implements UserService, UserServiceRepo {
     }
 
     @Override
+    public CompletableFuture<UserModel> forgotPassword(String username, Locale locale) {
+        return supplyAsync(() ->
+                {
+                    User user = userRepository.findByUsername(username)
+                            .orElseThrow(() -> exceptions.handleCreateNotFoundException("User %s not found", username));
+                    String token = createActivationTokenForUser(user.getUsername());
+                    String emailHtml = buildForgptPasswordMail(token, locale);
+                    emailService.sendEmailToOneAddress(emailHtml,
+                            "Forgot your password?",
+                            user.getEmail(),
+                            "notificaiton@iddera.com");
+                    return user.toModel();
+                }, executor
+
+        );
+    }
+
+    @Override
     @Transactional
     public CompletableFuture<UserModel> changePassword(Long userId, ChangeUserPasswordRequest request) {
         return supplyAsync(() -> {
@@ -189,6 +212,25 @@ public class DefaultUserService implements UserService, UserServiceRepo {
         user.setStatus(EntityStatus.ACTIVE);
         userRepository.save(user);
         return getByUserName(userVerificationRequest.getUsername());
+    }
+
+    @Override
+    public CompletableFuture<UserModel> resetPassword(Long id, ForgotPasswordRequest forgotPasswordRequest, Locale locale) {
+        return supplyAsync(() -> {
+                    User user = getUser(id, () -> exceptions.handleCreateNotFoundException("User does not exist"));
+
+                    ensureNewPasswordMatchesConfirmedPassword(forgotPasswordRequest.getNewPassword(), forgotPasswordRequest.getConfirmPassword());
+                    UserForgotPasswordToken userForgotPasswordToken = userForgotPasswordTokenRepository.findByUsername(user.getUsername());
+                    if(userForgotPasswordToken==null)
+                        throw exceptions.handleCreateNotFoundException("User token not found for user %s",user.getUsername());
+                    if (!forgotPasswordRequest.getToken().contentEquals(userForgotPasswordToken.getActivationToken()))
+                        throw exceptions.handleCreateBadRequest("This token isn't mapped to the user");
+                    user.setPassword(forgotPasswordRequest.getNewPassword());
+                    user = userRepository.save(user);
+                    return user.toModel();
+                }
+
+                , executor);
     }
 
     private Role getRole(Long roleId) {
@@ -258,4 +300,15 @@ public class DefaultUserService implements UserService, UserServiceRepo {
         userActivationToken = userActivationTokenRepository.save(userActivationToken);
         return userActivationToken.getActivationToken();
     }
+
+    private String buildNewUserWelcomeMail(String username, String token, Locale locale) {
+        Map<String, Object> variableMap = mailContentBuilder.getActivateUserProperties(username, token);
+        return mailContentBuilder.generateMailContent(variableMap, Constants.ACTIVATE_USER_TEMPLATE, locale);
+    }
+
+    private String buildForgptPasswordMail(String token, Locale locale) {
+        Map<String, Object> variableMap = mailContentBuilder.getForgotPasswordProperties(token);
+        return mailContentBuilder.generateMailContent(variableMap, Constants.ACTIVATE_USER_TEMPLATE, locale);
+    }
+
 }
