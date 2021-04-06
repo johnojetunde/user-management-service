@@ -2,12 +2,11 @@ package com.iddera.usermanagement.api.domain.service.concretes;
 
 
 import com.iddera.commons.utils.ValidationUtil;
+import com.iddera.usermanagement.api.app.config.EmailConfiguration;
 import com.iddera.usermanagement.api.app.util.Constants;
+import com.iddera.usermanagement.api.app.util.TemplateConstants;
 import com.iddera.usermanagement.api.domain.exception.UserManagementExceptionService;
-import com.iddera.usermanagement.api.domain.service.abstracts.EmailService;
-import com.iddera.usermanagement.api.domain.service.abstracts.MailContentBuilder;
-import com.iddera.usermanagement.api.domain.service.abstracts.TokenGenerationService;
-import com.iddera.usermanagement.api.domain.service.abstracts.UserService;
+import com.iddera.usermanagement.api.domain.service.abstracts.*;
 import com.iddera.usermanagement.api.persistence.entity.Role;
 import com.iddera.usermanagement.api.persistence.entity.User;
 import com.iddera.usermanagement.api.persistence.entity.UserActivationToken;
@@ -27,6 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -40,7 +40,7 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 
 @Service
-public class DefaultUserService implements UserService, UserServiceRepo {
+public class DefaultUserService implements UserService, UserServiceRepo, UserActivationService, UserPasswordService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -52,6 +52,8 @@ public class DefaultUserService implements UserService, UserServiceRepo {
     private final UserForgotPasswordTokenRepository userForgotPasswordTokenRepository;
     private final UserManagementExceptionService exceptions;
     private final MailContentBuilder mailContentBuilder;
+    private final EmailConfiguration emailConfiguration;
+
 
     public DefaultUserService(UserRepository userRepository,
                               RoleRepository roleRepository,
@@ -62,7 +64,8 @@ public class DefaultUserService implements UserService, UserServiceRepo {
                               TokenGenerationService tokenGenerationService,
                               UserForgotPasswordTokenRepository userForgotPasswordTokenRepository,
                               UserManagementExceptionService exceptions,
-                              MailContentBuilder mailContentBuilder) {
+                              MailContentBuilder mailContentBuilder,
+                              EmailConfiguration emailConfiguration) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.executor = executor;
@@ -73,6 +76,7 @@ public class DefaultUserService implements UserService, UserServiceRepo {
         this.userForgotPasswordTokenRepository = userForgotPasswordTokenRepository;
         this.exceptions = exceptions;
         this.mailContentBuilder = mailContentBuilder;
+        this.emailConfiguration = emailConfiguration;
     }
 
     @Override
@@ -159,6 +163,7 @@ public class DefaultUserService implements UserService, UserServiceRepo {
                                 () -> exceptions.handleCreateNotFoundException("User not found", username)));
     }
 
+
     @Override
     public CompletableFuture<UserModel> forgotPassword(String username, Locale locale) {
         return supplyAsync(() ->
@@ -166,7 +171,7 @@ public class DefaultUserService implements UserService, UserServiceRepo {
                     User user = userRepository.findByUsername(username)
                             .orElseThrow(() -> exceptions.handleCreateNotFoundException("User %s not found", username));
                     String token = createActivationTokenForUser(user.getUsername());
-                    String emailHtml = buildForgptPasswordMail(token, locale);
+                    String emailHtml = buildForgotPasswordMail(token, locale, username);
                     emailService.sendEmailToOneAddress(emailHtml,
                             "Forgot your password?",
                             user.getEmail(),
@@ -214,6 +219,40 @@ public class DefaultUserService implements UserService, UserServiceRepo {
         return getByUserName(userVerificationRequest.getUsername());
     }
 
+
+    @Override
+    public Map<String, Object> getForgotPasswordProperties(String token, String username) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(emailConfiguration.getUserForgotPasswordUrl());
+        stringBuilder.append("?tkn=");
+        stringBuilder.append(token);
+        Map<String, Object> variableMap = new HashMap<>();
+        variableMap.put(TemplateConstants.ACTIVATION_KEY, stringBuilder.toString());
+        variableMap.put("username", username);
+        variableMap.put(TemplateConstants.MINI_TITLE_KEY, TemplateConstants.FORGOT_PASSWORD_MINI_TITLE);
+        variableMap.put(TemplateConstants.TITLE_KEY, TemplateConstants.FORGOT_PASSWORD_TITLE);
+        variableMap.put(TemplateConstants.MESSAGE_KEY, TemplateConstants.FORGOT_PASSWORD_MESSAGE);
+        variableMap.put(TemplateConstants.BUTTON_KEY, TemplateConstants.FORGOT_PASSWORD_BUTTON);
+        return variableMap;
+    }
+
+    @Override
+    public Map<String, Object> getActivateUserProperties(String username, String token) {
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(emailConfiguration.getUserActivationUrl());
+        stringBuilder.append("?tkn=");
+        stringBuilder.append(token);
+        Map<String, Object> variableMap = new HashMap<>();
+        variableMap.put(TemplateConstants.ACTIVATION_KEY, stringBuilder.toString());
+        variableMap.put("username", username);
+        variableMap.put(TemplateConstants.MINI_TITLE_KEY, TemplateConstants.ACTIVATE_USER_MINI_TITLE);
+        variableMap.put(TemplateConstants.TITLE_KEY, TemplateConstants.ACTIVATE_USER_TITLE);
+        variableMap.put(TemplateConstants.MESSAGE_KEY, TemplateConstants.ACTIVATE_USER_MESSAGE);
+        variableMap.put(TemplateConstants.BUTTON_KEY, TemplateConstants.ACTIVATE_USER_BUTTON);
+        return variableMap;
+    }
+
     @Override
     public CompletableFuture<UserModel> resetPassword(Long id, ForgotPasswordRequest forgotPasswordRequest, Locale locale) {
         return supplyAsync(() -> {
@@ -221,8 +260,8 @@ public class DefaultUserService implements UserService, UserServiceRepo {
 
                     ensureNewPasswordMatchesConfirmedPassword(forgotPasswordRequest.getNewPassword(), forgotPasswordRequest.getConfirmPassword());
                     UserForgotPasswordToken userForgotPasswordToken = userForgotPasswordTokenRepository.findByUsername(user.getUsername());
-                    if(userForgotPasswordToken==null)
-                        throw exceptions.handleCreateNotFoundException("User token not found for user %s",user.getUsername());
+                    if (userForgotPasswordToken == null)
+                        throw exceptions.handleCreateNotFoundException("User token not found for user %s", user.getUsername());
                     if (!forgotPasswordRequest.getToken().contentEquals(userForgotPasswordToken.getActivationToken()))
                         throw exceptions.handleCreateBadRequest("This token isn't mapped to the user");
                     user.setPassword(forgotPasswordRequest.getNewPassword());
@@ -302,13 +341,13 @@ public class DefaultUserService implements UserService, UserServiceRepo {
     }
 
     private String buildNewUserWelcomeMail(String username, String token, Locale locale) {
-        Map<String, Object> variableMap = mailContentBuilder.getActivateUserProperties(username, token);
-        return mailContentBuilder.generateMailContent(variableMap, Constants.ACTIVATE_USER_TEMPLATE, locale);
+        Map<String, Object> variableMap = getActivateUserProperties(username, token);
+        return mailContentBuilder.generateMailContent(variableMap, Constants.TEMPLATE, locale);
     }
 
-    private String buildForgptPasswordMail(String token, Locale locale) {
-        Map<String, Object> variableMap = mailContentBuilder.getForgotPasswordProperties(token);
-        return mailContentBuilder.generateMailContent(variableMap, Constants.ACTIVATE_USER_TEMPLATE, locale);
+    private String buildForgotPasswordMail(String token, Locale locale, String username) {
+        Map<String, Object> variableMap = getForgotPasswordProperties(token, username);
+        return mailContentBuilder.generateMailContent(variableMap, Constants.TEMPLATE, locale);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.iddera.usermanagement.api.domain.service.abstracts;
 
-import com.iddera.usermanagement.lib.app.request.*;
+import com.iddera.usermanagement.lib.app.request.UserRequest;
+import com.iddera.usermanagement.lib.app.request.UserUpdateRequest;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,11 +20,5 @@ public interface UserService {
 
     CompletableFuture<UserModel> getByUserName(String username);
 
-    CompletableFuture<UserModel> forgotPassword(String username,Locale locale);
 
-    CompletableFuture<UserModel> resetPassword(Long id, ForgotPasswordRequest forgotPasswordRequest, Locale locale);
-
-    CompletableFuture<UserModel> changePassword(Long userId, ChangeUserPasswordRequest changeUserPasswordRequest);
-
-    CompletableFuture<UserModel> verifyUser(UserVerificationRequest userVerificationRequest);
 }

@@ -1,12 +1,11 @@
 package com.iddera.usermanagement.api;
 
 
+import com.iddera.usermanagement.api.app.config.EmailConfiguration;
 import com.iddera.usermanagement.api.app.util.Constants;
 import com.iddera.usermanagement.api.domain.exception.UserManagementException;
 import com.iddera.usermanagement.api.domain.exception.UserManagementExceptionService;
-import com.iddera.usermanagement.api.domain.service.abstracts.EmailService;
-import com.iddera.usermanagement.api.domain.service.abstracts.MailContentBuilder;
-import com.iddera.usermanagement.api.domain.service.abstracts.TokenGenerationService;
+import com.iddera.usermanagement.api.domain.service.abstracts.*;
 import com.iddera.usermanagement.api.domain.service.concretes.DefaultUserService;
 import com.iddera.usermanagement.api.persistence.entity.Role;
 import com.iddera.usermanagement.api.persistence.entity.User;
@@ -71,10 +70,18 @@ class DefaultUserServiceTest {
     UserForgotPasswordTokenRepository userForgotPasswordTokenRepository;
     @Mock
     TokenGenerationService tokenGenerationService;
+
+    @Mock
+    EmailConfiguration emailConfiguration;
     private DefaultUserService userService;
     private static final Clock clock = Clock.fixed(
             Instant.parse("2020-12-04T10:15:30.00Z"),
             ZoneId.systemDefault());
+    @Mock
+    UserActivationService userActivationService;
+
+    @Mock
+    UserPasswordService userPasswordService;
 
     @BeforeEach
     void setUp() {
@@ -88,7 +95,8 @@ class DefaultUserServiceTest {
                 userActivationTokenRepository,
                 tokenGenerationService,
                 userForgotPasswordTokenRepository,
-                new UserManagementExceptionService(),mailContentBuilder);
+                new UserManagementExceptionService(), mailContentBuilder,
+                emailConfiguration);
     }
 
     @Test
@@ -167,9 +175,9 @@ class DefaultUserServiceTest {
         when(userActivationTokenRepository.save(any()))
                 .thenReturn(buildUserActivationToken());
 
-        when(mailContentBuilder.getActivateUserProperties("iddera","123456789"))
+        when(userActivationService.getActivateUserProperties("iddera", "123456789"))
                 .thenReturn(new HashMap<>());
-        when(mailContentBuilder.generateMailContent(any(), eq(Constants.ACTIVATE_USER_TEMPLATE),eq(locale)))
+        when(mailContentBuilder.generateMailContent(any(), eq(Constants.TEMPLATE), eq(locale)))
                 .thenReturn("New User Email Is Here!!");
 
         UserModel result = userService.create(buildUserRequest(),locale ).join();
@@ -425,7 +433,7 @@ class DefaultUserServiceTest {
     }
 
     @Test
-    void forgotPasswordSuccess(){
+    void forgotPasswordSuccess() {
         Locale locale = new Locale("en");
         when(userRepository.findByUsername(eq("iddera")))
                 .thenReturn(Optional.of(user()));
@@ -434,18 +442,16 @@ class DefaultUserServiceTest {
         when(userActivationTokenRepository.save(any()))
                 .thenReturn(buildUserActivationToken());
 
-        when(mailContentBuilder.getForgotPasswordProperties("123456789"))
-                .thenReturn(new HashMap<>());
-        when(mailContentBuilder.generateMailContent(any(), eq(Constants.ACTIVATE_USER_TEMPLATE),eq(locale)))
+
+        when(mailContentBuilder.generateMailContent(any(), eq(Constants.TEMPLATE), eq(locale)))
                 .thenReturn("User Password Email Is Here!!");
-        UserModel result = userService.forgotPassword("iddera",locale).join();
+        UserModel result = userService.forgotPassword("iddera", locale).join();
         assertUserValues(result);
         verify(userRepository).findByUsername("iddera");
         verify(tokenGenerationService).generateToken();
         verify(userActivationTokenRepository).save(any());
 
-        verify(mailContentBuilder).getForgotPasswordProperties("123456789");
-        verify(mailContentBuilder).generateMailContent(any(HashMap.class), eq(Constants.ACTIVATE_USER_TEMPLATE),eq(locale));
+        verify(mailContentBuilder).generateMailContent(any(HashMap.class), eq(Constants.TEMPLATE), eq(locale));
     }
 
     @Test
