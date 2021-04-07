@@ -1,6 +1,7 @@
 package com.iddera.usermanagement.api.domain.service.concretes;
 
 
+import com.iddera.commons.exception.ApiException;
 import com.iddera.commons.utils.ValidationUtil;
 import com.iddera.usermanagement.api.domain.exception.UserManagementExceptionService;
 import com.iddera.usermanagement.api.domain.service.abstracts.EmailService;
@@ -23,10 +24,16 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
@@ -189,6 +196,19 @@ public class DefaultUserService implements UserService, UserServiceRepo {
         user.setStatus(EntityStatus.ACTIVE);
         userRepository.save(user);
         return getByUserName(userVerificationRequest.getUsername());
+    }
+
+    @Override
+    public CompletableFuture<UserModel> getUserDetails(Principal principal) {
+        if(principal == null) {
+            throw exceptions.handleCreateNotFoundException("Unable to get user details.");
+        }
+
+        return supplyAsync(() ->
+                userRepository.findByUsername(principal.getName())
+                        .map(User::toModel)
+                        .orElseThrow(
+                                () -> exceptions.handleCreateNotFoundException("User not found", principal.getName())));
     }
 
     private Role getRole(Long roleId) {

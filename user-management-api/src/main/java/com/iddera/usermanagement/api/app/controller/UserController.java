@@ -13,9 +13,13 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.concurrent.CompletableFuture;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -66,6 +70,13 @@ public class UserController {
     public CompletableFuture<ResponseModel> get(@PageableDefault Pageable pageable) {
         return userService.getAll(pageable)
                 .thenApply(UserResult::new)
+                .thenApply(ResponseModel::new);
+    }
+
+    @GetMapping("/userdetails")
+    @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
+    public CompletableFuture<ResponseModel> getUserDetails(Principal principal) {
+        return userService.getUserDetails(principal)
                 .thenApply(ResponseModel::new);
     }
 }

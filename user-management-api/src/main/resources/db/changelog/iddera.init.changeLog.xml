@@ -159,4 +159,25 @@
         <column name="status" type="VARCHAR(255)" > </column>
         </addColumn>
     </changeSet>
+
+
+    <changeSet  author="oakinrele"  id="202104061238-01">
+        <insert tableName="oauth_client_details">
+            <column name="client_id" value="iddera-client"/>
+            <column name="client_secret" value="$2a$10$WYRVVR0AWndE2Ky0NKSv3epnJiQuLQN8EhHS5kKBs09zeuAKcro1e"/>
+            <column name="scope" value="read,write"/>
+            <column name="resource_ids" value="iddera-service"/>
+            <column name="authorized_grant_types" value="password,refresh_token,client_credentials,authorization_code"/>
+            <column name="authorities" value="ROLE_CLIENT,ROLE_TRUSTED_CLIENT"/>
+            <column name="access_token_validity" value="31536000"/>
+            <column name="refresh_token_validity" value="2592000"/>
+        </insert>
+    </changeSet>
+
+
+    <changeSet author="oakinrele"  id="202009121306-02">
+        <delete tableName="oauth_client_details">
+            <where>client_id='ogirs-client'</where>
+        </delete>
+    </changeSet>
 </databaseChangeLog>
