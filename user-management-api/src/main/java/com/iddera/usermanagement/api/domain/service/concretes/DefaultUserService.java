@@ -264,7 +264,7 @@ public class DefaultUserService implements UserService, UserServiceRepo, UserAct
                         throw exceptions.handleCreateNotFoundException("User token not found for user %s", user.getUsername());
                     if (!forgotPasswordRequest.getToken().contentEquals(userForgotPasswordToken.getActivationToken()))
                         throw exceptions.handleCreateBadRequest("This token isn't mapped to the user");
-                    user.setPassword(forgotPasswordRequest.getNewPassword());
+                    user.setPassword(encoder.encode(forgotPasswordRequest.getNewPassword()));
                     user = userRepository.save(user);
                     return user.toModel();
                 }
