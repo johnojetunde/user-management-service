@@ -3,8 +3,11 @@ package com.iddera.usermanagement.api.app.controller;
 
 import com.iddera.usermanagement.api.app.model.ResponseModel;
 import com.iddera.usermanagement.api.app.model.UserResult;
+import com.iddera.usermanagement.api.domain.service.abstracts.UserActivationService;
+import com.iddera.usermanagement.api.domain.service.abstracts.UserPasswordService;
 import com.iddera.usermanagement.api.domain.service.abstracts.UserService;
 import com.iddera.usermanagement.lib.app.request.ChangeUserPasswordRequest;
+import com.iddera.usermanagement.lib.app.request.ForgotPasswordRequest;
 import com.iddera.usermanagement.lib.app.request.UserRequest;
 import com.iddera.usermanagement.lib.app.request.UserVerificationRequest;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
@@ -19,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Locale;
 import java.security.Principal;
 import java.util.concurrent.CompletableFuture;
 
@@ -31,10 +35,14 @@ public class UserController {
 
     private final UserService userService;
 
+    private final UserActivationService userActivationService;
+
+    private final UserPasswordService userPasswordService;
+
     @PostMapping(consumes = APPLICATION_JSON_VALUE)
     @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
-    public CompletableFuture<ResponseModel> create(@Valid @RequestBody UserRequest request) {
-        return userService.create(request)
+    public CompletableFuture<ResponseModel> create(@Valid @RequestBody UserRequest request, Locale locale) {
+        return userService.create(request, locale)
                 .thenApply(ResponseModel::new);
     }
 
@@ -48,7 +56,21 @@ public class UserController {
     @PostMapping("/{id}/change-password")
     @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
     public CompletableFuture<ResponseModel> changePassword(@PathVariable Long id, @Valid @RequestBody ChangeUserPasswordRequest changeUserPasswordRequest) {
-        return userService.changePassword(id,changeUserPasswordRequest)
+        return userPasswordService.changePassword(id, changeUserPasswordRequest)
+                .thenApply(ResponseModel::new);
+    }
+
+    @PostMapping("/{username}/forgot-password")
+    @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
+    public CompletableFuture<ResponseModel> changePassword(@PathVariable String username, Locale locale) {
+        return userPasswordService.forgotPassword(username, locale)
+                .thenApply(ResponseModel::new);
+    }
+
+    @PostMapping("/{id}/reset-password")
+    @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
+    public CompletableFuture<ResponseModel> changePassword(@PathVariable Long id, @Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest, Locale locale) {
+        return userPasswordService.resetPassword(id, forgotPasswordRequest, locale)
                 .thenApply(ResponseModel::new);
     }
 
@@ -61,7 +83,7 @@ public class UserController {
     @PostMapping("/verify-email")
     @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
     public CompletableFuture<ResponseModel> verifyEmail(@Valid @RequestBody UserVerificationRequest userVerificationRequest) {
-        return userService.verifyUser(userVerificationRequest)
+        return userActivationService.verifyUser(userVerificationRequest)
                 .thenApply(ResponseModel::new);
     }
 

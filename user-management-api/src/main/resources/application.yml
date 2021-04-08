@@ -44,4 +44,9 @@ iddera:
     write-time-out: 40
     connection-time-out: 300
 
+iderra:
+  email:
+    user-activation-url: 'http://localhost:8080/users/verify-email'
+    user-forgot-password-url: 'http://localhost:8080/users/reset-password'
+
 
