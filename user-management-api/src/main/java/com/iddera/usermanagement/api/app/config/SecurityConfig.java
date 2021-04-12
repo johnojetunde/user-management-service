@@ -47,7 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Value("${security.signing-key}")
     private String signingKey;
 
-    @Value("${spring.security.security-realm}")
+    @Value("${security.security-realm}")
     private String securityRealm;
 
     @Value("${redis.host}")
