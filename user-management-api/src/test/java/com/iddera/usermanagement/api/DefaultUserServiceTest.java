@@ -177,7 +177,7 @@ class DefaultUserServiceTest {
 
         when(userActivationService.getActivateUserProperties("iddera", "123456789"))
                 .thenReturn(new HashMap<>());
-        when(mailContentBuilder.generateMailContent(any(), eq(Constants.TEMPLATE), eq(locale)))
+        when(mailContentBuilder.generateMailContent(any(), eq(Constants.WELCOME_TEMPLATE), eq(locale)))
                 .thenReturn("New User Email Is Here!!");
 
         UserModel result = userService.create(buildUserRequest(),locale ).join();
@@ -443,7 +443,7 @@ class DefaultUserServiceTest {
                 .thenReturn(buildUserActivationToken());
 
 
-        when(mailContentBuilder.generateMailContent(any(), eq(Constants.TEMPLATE), eq(locale)))
+        when(mailContentBuilder.generateMailContent(any(), eq(Constants.WELCOME_TEMPLATE), eq(locale)))
                 .thenReturn("User Password Email Is Here!!");
         UserModel result = userService.forgotPassword("iddera", locale).join();
         assertUserValues(result);
@@ -451,7 +451,7 @@ class DefaultUserServiceTest {
         verify(tokenGenerationService).generateToken();
         verify(userActivationTokenRepository).save(any());
 
-        verify(mailContentBuilder).generateMailContent(any(HashMap.class), eq(Constants.TEMPLATE), eq(locale));
+        verify(mailContentBuilder).generateMailContent(any(HashMap.class), eq(Constants.WELCOME_TEMPLATE), eq(locale));
     }
 
     @Test

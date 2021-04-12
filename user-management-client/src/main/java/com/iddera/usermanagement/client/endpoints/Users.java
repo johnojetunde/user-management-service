@@ -47,4 +47,9 @@ public class Users {
         return userClient.getAll(pageNumber, pageSize)
                 .handleAsync(ErrorHandler::handleException);
     }
+
+    public CompletableFuture<ResponseModel<UserModel>> getUserDetails(@NonNull String bearerToken){
+        return userClient.getUserDetails(bearerToken)
+                .handleAsync(ErrorHandler::handleException);
+    }
 }

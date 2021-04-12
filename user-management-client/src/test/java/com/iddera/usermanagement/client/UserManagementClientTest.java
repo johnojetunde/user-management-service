@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Disabled
 class UserManagementClientTest {
     /***
-     * To use the user-management-lient-lib, you need to do the following:
+     * To use the user-management-client-lib, you need to do the following:
      * 1. add notification-client-lib as a dependency in your project
      *            <dependency>
      *             <groupId>com.iddera</groupId>

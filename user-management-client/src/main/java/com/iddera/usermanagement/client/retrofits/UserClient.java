@@ -29,4 +29,6 @@ public interface UserClient {
     @GET("users/")
     CompletableFuture<ResponseModel<Page<UserModel>>> getAll(@Query("page") Long pageNumber,
                                                              @Query("size") Long pageSize);
+    @GET("users/userdetails")
+    CompletableFuture<ResponseModel<UserModel>> getUserDetails(@Header("Authorization") String bearerToken);
 }

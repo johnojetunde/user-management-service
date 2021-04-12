@@ -220,6 +220,7 @@ public class DefaultUserService implements UserService, UserServiceRepo, UserAct
         return getByUserName(userVerificationRequest.getUsername());
     }
 
+    @Transactional
     @Override
     public CompletableFuture<UserModel> getUserDetails(Principal principal) {
         if(principal == null) {
@@ -356,12 +357,11 @@ public class DefaultUserService implements UserService, UserServiceRepo, UserAct
 
     private String buildNewUserWelcomeMail(String username, String token, Locale locale) {
         Map<String, Object> variableMap = getActivateUserProperties(username, token);
-        return mailContentBuilder.generateMailContent(variableMap, Constants.TEMPLATE, locale);
+        return mailContentBuilder.generateMailContent(variableMap, Constants.WELCOME_TEMPLATE, locale);
     }
 
     private String buildForgotPasswordMail(String token, Locale locale, String username) {
         Map<String, Object> variableMap = getForgotPasswordProperties(token, username);
-        return mailContentBuilder.generateMailContent(variableMap, Constants.TEMPLATE, locale);
+        return mailContentBuilder.generateMailContent(variableMap, Constants.FORGOT_PASSWORD_TEMPLATE, locale);
     }
-
 }
