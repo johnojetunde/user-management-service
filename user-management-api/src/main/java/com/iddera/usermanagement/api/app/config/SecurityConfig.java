@@ -44,7 +44,7 @@ import javax.servlet.http.HttpSessionListener;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Value("${spring.security.signing-key}")
+    @Value("${security.signing-key}")
     private String signingKey;
 
     @Value("${spring.security.security-realm}")
