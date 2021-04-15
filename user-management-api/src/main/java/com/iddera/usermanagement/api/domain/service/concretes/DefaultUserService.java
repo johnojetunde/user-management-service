@@ -223,10 +223,6 @@ public class DefaultUserService implements UserService, UserServiceRepo, UserAct
     @Transactional
     @Override
     public CompletableFuture<UserModel> getUserDetails(Principal principal) {
-        if(principal == null) {
-            throw exceptions.handleCreateNotFoundException("Unable to get user details.");
-        }
-
         return supplyAsync(() ->
                 userRepository.findByUsername(principal.getName())
                         .map(User::toModel)

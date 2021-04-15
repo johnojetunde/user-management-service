@@ -92,7 +92,7 @@ public class UserController {
                 .thenApply(ResponseModel::new);
     }
 
-    @GetMapping("/userdetails")
+    @GetMapping("/current")
     @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
     public CompletableFuture<ResponseModel> getUserDetails(Principal principal) {
         return userService.getUserDetails(principal)
