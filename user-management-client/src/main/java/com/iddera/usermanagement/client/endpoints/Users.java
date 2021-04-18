@@ -48,7 +48,8 @@ public class Users {
                 .handleAsync(ErrorHandler::handleException);
     }
 
-    public CompletableFuture<ResponseModel<UserModel>> getUserDetails(@NonNull String bearerToken){
+    public CompletableFuture<ResponseModel<UserModel>> getUserDetails(@NonNull String token){
+        String bearerToken = "Bearer ".concat(token);
         return userClient.getUserDetails(bearerToken)
                 .handleAsync(ErrorHandler::handleException);
     }
