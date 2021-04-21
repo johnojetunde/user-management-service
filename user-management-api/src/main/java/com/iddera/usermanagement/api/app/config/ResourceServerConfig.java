@@ -3,6 +3,7 @@ package com.iddera.usermanagement.api.app.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
@@ -25,9 +26,19 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     }
 
     public void configure(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeRequests()
-                .anyRequest()
+        httpSecurity
+                .requestMatchers()
+                .and()
+                .authorizeRequests()
+                .antMatchers(
+                        "/actuator/**",
+                        "/v2/api-docs/**",
+                        "/swagger**",
+                        "/swagger-resources/**",
+                        "/webjars/**")
                 .permitAll()
-                .and().csrf().disable();
+                .antMatchers(HttpMethod.POST,"/users/**")
+                .permitAll()
+                .anyRequest().authenticated();
     }
 }

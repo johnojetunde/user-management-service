@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Locale;
+import java.security.Principal;
 import java.util.concurrent.CompletableFuture;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -88,6 +89,13 @@ public class UserController {
     public CompletableFuture<ResponseModel> get(@PageableDefault Pageable pageable) {
         return userService.getAll(pageable)
                 .thenApply(UserResult::new)
+                .thenApply(ResponseModel::new);
+    }
+
+    @GetMapping("/current")
+    @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
+    public CompletableFuture<ResponseModel> getUserDetails(Principal principal) {
+        return userService.getUserDetails(principal)
                 .thenApply(ResponseModel::new);
     }
 }

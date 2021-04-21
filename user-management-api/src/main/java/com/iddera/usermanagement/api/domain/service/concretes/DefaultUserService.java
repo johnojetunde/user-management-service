@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.security.Principal;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
@@ -219,6 +220,16 @@ public class DefaultUserService implements UserService, UserServiceRepo, UserAct
         return getByUserName(userVerificationRequest.getUsername());
     }
 
+    @Transactional
+    @Override
+    public CompletableFuture<UserModel> getUserDetails(Principal principal) {
+        return supplyAsync(() ->
+                userRepository.findByUsername(principal.getName())
+                        .map(User::toModel)
+                        .orElseThrow(
+                                () -> exceptions.handleCreateNotFoundException("User not found", principal.getName())));
+    }
+
 
     @Override
     public Map<String, Object> getForgotPasswordProperties(String token, String username) {
@@ -342,12 +353,11 @@ public class DefaultUserService implements UserService, UserServiceRepo, UserAct
 
     private String buildNewUserWelcomeMail(String username, String token, Locale locale) {
         Map<String, Object> variableMap = getActivateUserProperties(username, token);
-        return mailContentBuilder.generateMailContent(variableMap, Constants.TEMPLATE, locale);
+        return mailContentBuilder.generateMailContent(variableMap, Constants.WELCOME_TEMPLATE, locale);
     }
 
     private String buildForgotPasswordMail(String token, Locale locale, String username) {
         Map<String, Object> variableMap = getForgotPasswordProperties(token, username);
-        return mailContentBuilder.generateMailContent(variableMap, Constants.TEMPLATE, locale);
+        return mailContentBuilder.generateMailContent(variableMap, Constants.FORGOT_PASSWORD_TEMPLATE, locale);
     }
-
 }

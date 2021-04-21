@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Locale;
+import java.security.Principal;
 import java.util.concurrent.CompletableFuture;
 
 public interface UserService {
@@ -20,5 +21,5 @@ public interface UserService {
 
     CompletableFuture<UserModel> getByUserName(String username);
 
-
+    CompletableFuture<UserModel> getUserDetails(Principal principal);
 }
