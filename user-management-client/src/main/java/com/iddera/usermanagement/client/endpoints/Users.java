@@ -16,6 +16,7 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class Users {
     private final UserClient userClient;
+    private static final String BEARER = "Bearer ";
 
     public CompletableFuture<ResponseModel<UserModel>> create(@NonNull UserRequest request) {
         return userClient.create(request)
@@ -49,7 +50,7 @@ public class Users {
     }
 
     public CompletableFuture<ResponseModel<UserModel>> getUserDetails(@NonNull String token){
-        String bearerToken = "Bearer ".concat(token);
+        String bearerToken = BEARER.concat(token);
         return userClient.getUserDetails(bearerToken)
                 .handleAsync(ErrorHandler::handleException);
     }
