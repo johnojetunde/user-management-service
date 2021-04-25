@@ -16,7 +16,7 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "role")
+@Table(name = "role", schema = "public")
 public class Role extends BaseEntity {
     private String name;
     private String description;

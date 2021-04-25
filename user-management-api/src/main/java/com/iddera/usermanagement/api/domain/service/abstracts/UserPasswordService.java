@@ -5,12 +5,9 @@ import com.iddera.usermanagement.lib.app.request.ForgotPasswordRequest;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
 
 import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public interface UserPasswordService {
-    Map<String, Object> getForgotPasswordProperties(String token, String username);
-
     CompletableFuture<UserModel> forgotPassword(String username, Locale locale);
 
     CompletableFuture<UserModel> resetPassword(Long id, ForgotPasswordRequest forgotPasswordRequest, Locale locale);

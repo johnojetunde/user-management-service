@@ -1,6 +1,6 @@
 package com.iddera.usermanagement.api.app.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,31 +13,21 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 
+@RequiredArgsConstructor
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
-
-    @Autowired
-    private TokenStore tokenStore;
-
-    @Autowired
-    private JwtAccessTokenConverter accessTokenConverter;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
+    private final TokenStore tokenStore;
+    private final JwtAccessTokenConverter accessTokenConverter;
+    private final AuthenticationManager authenticationManager;
+    private final UserDetailsService userDetailsService;
+    private final JdbcTemplate jdbcTemplate;
 
     public void configure(ClientDetailsServiceConfigurer configurer) throws Exception {
         configurer.jdbc(jdbcTemplate.getDataSource());
     }
 
-    public void configure(AuthorizationServerEndpointsConfigurer endpointsConfigurer){
+    public void configure(AuthorizationServerEndpointsConfigurer endpointsConfigurer) {
         endpointsConfigurer.tokenStore(tokenStore)
                 .reuseRefreshTokens(false)
                 .accessTokenConverter(accessTokenConverter)

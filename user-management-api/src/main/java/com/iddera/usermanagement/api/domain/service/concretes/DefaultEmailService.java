@@ -35,6 +35,4 @@ public class DefaultEmailService implements EmailService {
         ResponseModel<EmailResponseModel> response = emailClient.sendNow(request).join();
         return response.isSuccessful();
     }
-
-
 }

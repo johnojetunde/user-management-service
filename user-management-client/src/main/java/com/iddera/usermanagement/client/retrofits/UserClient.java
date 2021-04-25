@@ -5,6 +5,7 @@ import com.iddera.client.model.ResponseModel;
 import com.iddera.usermanagement.lib.app.request.ChangeUserPasswordRequest;
 import com.iddera.usermanagement.lib.app.request.UserRequest;
 import com.iddera.usermanagement.lib.app.request.UserVerificationRequest;
+import com.iddera.usermanagement.lib.domain.model.OauthToken;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
 import retrofit2.http.*;
 
@@ -13,6 +14,13 @@ import java.util.concurrent.CompletableFuture;
 public interface UserClient {
     @POST("users/send-now")
     CompletableFuture<ResponseModel<UserModel>> create(@Body UserRequest request);
+
+    @FormUrlEncoded
+    @POST("oauth/token")
+    CompletableFuture<OauthToken> login(@Header("Authorization") String basicAuthorization,
+                                        @Field("grant_type") String grantType,
+                                        @Field("username") String username,
+                                        @Field("password") String password);
 
     @GET("users/{id}")
     CompletableFuture<ResponseModel<UserModel>> getById(@Path("id") Long id);
@@ -29,6 +37,7 @@ public interface UserClient {
     @GET("users/")
     CompletableFuture<ResponseModel<Page<UserModel>>> getAll(@Query("page") Long pageNumber,
                                                              @Query("size") Long pageSize);
+
     @GET("users/current")
     CompletableFuture<ResponseModel<UserModel>> getUserDetails(@Header("Authorization") String bearerToken);
 }

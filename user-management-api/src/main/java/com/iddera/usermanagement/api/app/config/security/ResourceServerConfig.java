@@ -1,4 +1,4 @@
-package com.iddera.usermanagement.api.app.config;
+package com.iddera.usermanagement.api.app.config.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

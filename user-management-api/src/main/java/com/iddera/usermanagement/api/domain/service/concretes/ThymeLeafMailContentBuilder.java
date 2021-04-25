@@ -12,15 +12,11 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class ThymeLeafMailContentBuilder implements MailContentBuilder {
-
     private final TemplateEngine templateEngine;
-
 
     @Override
     public String generateMailContent(Map<String, Object> variables, String template, Locale locale) {
         Context context = new Context(locale, variables);
         return templateEngine.process(template, context);
     }
-
-
 }

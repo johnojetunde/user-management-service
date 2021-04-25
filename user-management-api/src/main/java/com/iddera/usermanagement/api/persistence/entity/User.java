@@ -23,7 +23,7 @@ import static javax.persistence.FetchType.EAGER;
 @NoArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "user")
+@Table(name = "user", schema = "public")
 public class User extends BaseEntity {
     private String firstName;
     private String lastName;

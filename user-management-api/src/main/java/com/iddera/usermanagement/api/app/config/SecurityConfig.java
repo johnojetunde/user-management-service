@@ -1,16 +1,15 @@
 package com.iddera.usermanagement.api.app.config;
 
-import com.google.common.base.Strings;
+import com.iddera.usermanagement.api.app.config.security.IdderaConcurrentSessions;
 import com.iddera.usermanagement.api.persistence.entity.UserActivationToken;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.data.redis.connection.RedisPassword;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -50,20 +49,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Value("${security.security-realm}")
     private String securityRealm;
 
-    @Value("${redis.host}")
-    private String redisHost;
-
-    @Value("${redis.port}")
-    private Integer redisPort;
-
-    @Value("${redis.database:0}")
-    private Integer redisDatabase;
-
-    @Value("${redis.password:#{null}}")
-    private String redisPassword;
-
     @Value("${resource.id}")
     private String resourceId;
+
+    @Autowired
+    private RedisConnectionFactory redisConnectionFactory;
 
     @Bean
     public PasswordEncoder encoder() {
@@ -112,7 +102,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public TokenStore tokenStore() {
-        return new RedisTokenStore(jedisConnectionFactory());
+        return new RedisTokenStore(redisConnectionFactory);
     }
 
     @Bean
@@ -125,20 +115,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    @Primary
-    public JedisConnectionFactory jedisConnectionFactory() {
-        var redisStandaloneConfiguration = new RedisStandaloneConfiguration(redisHost, redisPort);
-        redisStandaloneConfiguration.setDatabase(redisDatabase);
-        if (!Strings.isNullOrEmpty(redisPassword)) {
-            redisStandaloneConfiguration.setPassword(RedisPassword.of(redisPassword));
-        }
-        return new JedisConnectionFactory(redisStandaloneConfiguration);
-    }
-
-    @Bean
     public RedisTemplate<String, Object> redisTemplate() {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(jedisConnectionFactory());
+        template.setConnectionFactory(redisConnectionFactory);
         return template;
     }
 
@@ -149,7 +128,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public IdderaConcurrentSessions idderaConcurrentSessions() {
-        return new IdderaConcurrentSessions(tokenStore(), sessionRegistry(), resourceId);
+        return new IdderaConcurrentSessions(tokenStore(), resourceId);
     }
 
     @Bean

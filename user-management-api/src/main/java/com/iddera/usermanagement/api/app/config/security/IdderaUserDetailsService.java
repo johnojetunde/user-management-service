@@ -1,4 +1,4 @@
-package com.iddera.usermanagement.api.app.config;
+package com.iddera.usermanagement.api.app.config.security;
 
 import com.iddera.usermanagement.api.persistence.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,6 @@ import static java.lang.String.format;
 public class IdderaUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
-
 
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {

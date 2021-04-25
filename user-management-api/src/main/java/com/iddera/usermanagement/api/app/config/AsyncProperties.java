@@ -18,7 +18,7 @@ import static java.util.concurrent.Executors.newScheduledThreadPool;
 @EnableAsync
 @Configuration
 @ConfigurationProperties(prefix = "async")
-public class AsyncConfig implements AsyncConfigurer {
+public class AsyncProperties implements AsyncConfigurer {
 
     private Integer poolSize = 100;
     private Integer poolMaxSize = 100;

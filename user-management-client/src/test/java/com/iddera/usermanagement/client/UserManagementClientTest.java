@@ -47,7 +47,7 @@ class UserManagementClientTest {
     @Test
     void createUser() {
         RetrofitProvider retrofitProvider = new RetrofitProvider(300, 30, 30);
-        UserManagementClient userManagementClient = new UserManagementClient(retrofitProvider, "https://iddera-notification-api.herokuapp.com/");
+        UserManagementClient userManagementClient = new UserManagementClient(retrofitProvider, "https://iddera-user-management-api.herokuapp.com/");
         var request = new UserRequest()
                 .setEmail("hello@hello.com")
                 .setDateOfBirth(LocalDate.now())

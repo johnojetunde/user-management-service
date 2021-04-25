@@ -16,7 +16,6 @@ import java.io.Serializable;
 @Accessors(chain = true)
 @AllArgsConstructor
 public class UserActivationToken implements Serializable {
-
     @Id
     private Long id;
 
@@ -25,6 +24,4 @@ public class UserActivationToken implements Serializable {
 
     @Indexed
     private String activationToken;
-
-
 }

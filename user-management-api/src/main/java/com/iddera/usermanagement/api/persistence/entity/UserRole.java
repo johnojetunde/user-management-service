@@ -14,7 +14,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Entity
-@Table(name = "user_role")
+@Table(name = "user_role", schema = "public")
 public class UserRole extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "user_id")

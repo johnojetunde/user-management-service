@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "iddera.client")
-public class ClientConfiguration {
+public class ClientProperties {
     private String notificationUrl;
     private Integer readTimeOut = 40;
     private Integer connectionTimeOut = 40;
