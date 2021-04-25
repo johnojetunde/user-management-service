@@ -23,7 +23,7 @@ security:
   encoding-strength: 256
   security-realm: Iddera
 resource:
-  id: iddera_service
+  id: iddera-service
 logging:
   level:
     root: INFO

@@ -60,5 +60,4 @@ public class Swagger {
                 .description("Iddera User Service")
                 .build();
     }
-
 }
