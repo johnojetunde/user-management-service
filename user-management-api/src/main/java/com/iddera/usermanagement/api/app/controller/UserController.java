@@ -5,10 +5,7 @@ import com.iddera.usermanagement.api.app.model.ResponseModel;
 import com.iddera.usermanagement.api.app.model.UserResult;
 import com.iddera.usermanagement.api.domain.service.abstracts.UserPasswordService;
 import com.iddera.usermanagement.api.domain.service.abstracts.UserService;
-import com.iddera.usermanagement.lib.app.request.ChangeUserPasswordRequest;
-import com.iddera.usermanagement.lib.app.request.ForgotPasswordRequest;
-import com.iddera.usermanagement.lib.app.request.UserRequest;
-import com.iddera.usermanagement.lib.app.request.UserVerificationRequest;
+import com.iddera.usermanagement.lib.app.request.*;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -30,7 +27,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class UserController {
 
     private final UserService userService;
-
     private final UserPasswordService userPasswordService;
 
     @PostMapping(consumes = APPLICATION_JSON_VALUE)
@@ -55,19 +51,18 @@ public class UserController {
                 .thenApply(ResponseModel::new);
     }
 
-    @PostMapping("/{username}/forgot-password")
+    @PostMapping("/reset-password/initiate")
     @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
-    public CompletableFuture<ResponseModel> changePassword(@PathVariable String username, Locale locale) {
-        return userPasswordService.forgotPassword(username, locale)
+    public CompletableFuture<ResponseModel> initiateForgotPassword(@Valid @RequestBody EmailModel emailModel, Locale locale) {
+        return userPasswordService.initiatePasswordReset(emailModel, locale)
                 .thenApply(ResponseModel::new);
     }
 
-    @PostMapping("/{id}/reset-password")
+    @PostMapping("/reset-password/update")
     @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
-    public CompletableFuture<ResponseModel> changePassword(@PathVariable Long id,
-                                                           @Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest,
-                                                           Locale locale) {
-        return userPasswordService.resetPassword(id, forgotPasswordRequest, locale)
+    public CompletableFuture<ResponseModel> resetPassword(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest,
+                                                          Locale locale) {
+        return userPasswordService.resetPassword(forgotPasswordRequest, locale)
                 .thenApply(ResponseModel::new);
     }
 

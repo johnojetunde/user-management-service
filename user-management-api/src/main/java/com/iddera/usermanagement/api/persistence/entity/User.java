@@ -1,14 +1,16 @@
 package com.iddera.usermanagement.api.persistence.entity;
 
 
-import com.iddera.usermanagement.lib.domain.model.*;
+import com.iddera.usermanagement.lib.domain.model.EntityStatus;
+import com.iddera.usermanagement.lib.domain.model.RoleModel;
+import com.iddera.usermanagement.lib.domain.model.UserModel;
+import com.iddera.usermanagement.lib.domain.model.UserType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
@@ -33,9 +35,6 @@ public class User extends BaseEntity {
     private String username;
     private String password;
     @Enumerated(EnumType.STRING)
-    private Gender gender;
-    private LocalDate dateOfBirth;
-    @Enumerated(EnumType.STRING)
     private UserType type;
     private LocalDateTime lastLoginDate;
     private EntityStatus status;
@@ -57,15 +56,13 @@ public class User extends BaseEntity {
                 .setLastName(getLastName())
                 .setEmail(getEmail())
                 .setUsername(getUsername())
-                .setDateOfBirth(getDateOfBirth())
                 .setType(getType())
                 .setLastLoginDate(getLastLoginDate())
                 .setCreatedAt(getCreatedAt())
                 .setUpdatedAt(getUpdatedAt())
                 .setCreatedBy(getCreatedBy())
                 .setUpdatedBy(getUpdatedBy())
-                .setRole(getRoleModels())
-                .setGender(getGender());
+                .setRole(getRoleModels());
     }
 
     private Set<RoleModel> getRoleModels() {

@@ -8,7 +8,6 @@ import com.iddera.usermanagement.api.domain.exception.UserManagementExceptionSer
 import com.iddera.usermanagement.api.domain.service.abstracts.EmailService;
 import com.iddera.usermanagement.api.domain.service.abstracts.MailContentBuilder;
 import com.iddera.usermanagement.api.domain.service.abstracts.TokenGenerationService;
-import com.iddera.usermanagement.api.domain.service.abstracts.UserPasswordService;
 import com.iddera.usermanagement.api.domain.service.concretes.DefaultUserService;
 import com.iddera.usermanagement.api.persistence.entity.Role;
 import com.iddera.usermanagement.api.persistence.entity.User;
@@ -18,11 +17,7 @@ import com.iddera.usermanagement.api.persistence.repository.RoleRepository;
 import com.iddera.usermanagement.api.persistence.repository.UserRepository;
 import com.iddera.usermanagement.api.persistence.repository.redis.UserActivationTokenRepository;
 import com.iddera.usermanagement.api.persistence.repository.redis.UserForgotPasswordTokenRepository;
-import com.iddera.usermanagement.lib.app.request.ChangeUserPasswordRequest;
-import com.iddera.usermanagement.lib.app.request.ForgotPasswordRequest;
-import com.iddera.usermanagement.lib.app.request.UserRequest;
-import com.iddera.usermanagement.lib.app.request.UserUpdateRequest;
-import com.iddera.usermanagement.lib.domain.model.Gender;
+import com.iddera.usermanagement.lib.app.request.*;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
 import com.iddera.usermanagement.lib.domain.model.UserType;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,11 +29,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -61,27 +52,19 @@ class DefaultUserServiceTest {
     private RoleRepository roleRepository;
     @Mock
     private PasswordEncoder encoder;
-
     @Mock
     private EmailService emailService;
     @Mock
-    MailContentBuilder mailContentBuilder;
+    private MailContentBuilder mailContentBuilder;
     @Mock
-    UserActivationTokenRepository userActivationTokenRepository;
-
+    private UserActivationTokenRepository userActivationTokenRepository;
     @Mock
-    UserForgotPasswordTokenRepository userForgotPasswordTokenRepository;
+    private UserForgotPasswordTokenRepository userForgotPasswordTokenRepository;
     @Mock
-    TokenGenerationService tokenGenerationService;
-
+    private TokenGenerationService tokenGenerationService;
     @Mock
-    EmailConfiguration emailConfiguration;
+    private EmailConfiguration emailConfiguration;
     private DefaultUserService userService;
-    private static final Clock clock = Clock.fixed(
-            Instant.parse("2020-12-04T10:15:30.00Z"),
-            ZoneId.systemDefault());
-    @Mock
-    UserPasswordService userPasswordService;
 
     @BeforeEach
     void setUp() {
@@ -354,6 +337,7 @@ class DefaultUserServiceTest {
                 .hasCause(new UserManagementException("User does not exist"))
                 .extracting(Throwable::getCause)
                 .hasFieldOrPropertyWithValue("code", BAD_REQUEST.value());
+
         verify(userRepository).findById(eq(1L));
     }
 
@@ -373,9 +357,9 @@ class DefaultUserServiceTest {
                 .hasCause(new UserManagementException("User password doesn't match current password"))
                 .extracting(Throwable::getCause)
                 .hasFieldOrPropertyWithValue("code", BAD_REQUEST.value());
+
         verify(userRepository).findById(eq(1L));
         verify(encoder).matches(eq("iderra"), eq("iddera"));
-
     }
 
     @Test
@@ -403,119 +387,98 @@ class DefaultUserServiceTest {
         verify(encoder).matches(eq("iddera"), eq("iddera"));
         verify(encoder).encode(eq("iderra"));
         verify(userRepository).save(any(User.class));
-
-
     }
 
     @Test
     void forgotPasswordSuccess() {
         Locale locale = new Locale("en");
-        when(userRepository.findByUsername(eq("iddera")))
+        when(userRepository.findByEmail(eq("iddera@iddera.com")))
                 .thenReturn(Optional.of(user()));
         when(tokenGenerationService.generateToken())
                 .thenReturn("123456789");
-        when(userActivationTokenRepository.save(any()))
-                .thenReturn(buildUserActivationToken());
-
+        when(userForgotPasswordTokenRepository.save(any()))
+                .thenReturn(buildUserForgottenPassword());
+        doNothing()
+                .when(userForgotPasswordTokenRepository).deleteById(anyLong());
 
         when(mailContentBuilder.generateMailContent(any(), eq(Constants.WELCOME_TEMPLATE), eq(locale)))
                 .thenReturn("User Password Email Is Here!!");
-        UserModel result = userService.forgotPassword("iddera", locale).join();
-        assertUserValues(result);
-        verify(userRepository).findByUsername("iddera");
-        verify(tokenGenerationService).generateToken();
-        verify(userActivationTokenRepository).save(any());
 
-        verify(mailContentBuilder).generateMailContent(any(HashMap.class), eq(Constants.WELCOME_TEMPLATE), eq(locale));
+        UserModel result = userService.initiatePasswordReset(emailModel(), locale).join();
+
+        assertUserValues(result);
+        verify(userRepository).findByEmail("iddera@iddera.com");
+        verify(tokenGenerationService).generateToken();
+        verify(userForgotPasswordTokenRepository).save(any());
+        verify(mailContentBuilder).generateMailContent(anyMap(), eq(Constants.WELCOME_TEMPLATE), eq(locale));
     }
 
     @Test
-    void forgotPasswordFailsWrongUsername() {
-        when(userRepository.findByUsername(eq("iddera")))
+    void forgotPasswordFailsWrongEmail() {
+        when(userRepository.findByEmail(eq("iddera@iddera.com")))
                 .thenReturn(Optional.empty());
 
 
-        CompletableFuture<UserModel> result = userService.forgotPassword("iddera", new Locale("en"));
-
+        CompletableFuture<UserModel> result = userService.initiatePasswordReset(emailModel(), new Locale("en"));
 
         assertThatThrownBy(result::join)
                 .isInstanceOf(CompletionException.class)
-                .hasCause(new UserManagementException("User iddera not found"))
+                .hasCause(new UserManagementException("User iddera@iddera.com not found"))
                 .extracting(Throwable::getCause)
                 .hasFieldOrPropertyWithValue("code", BAD_REQUEST.value());
-        verify(userRepository).findByUsername(eq("iddera"));
+        verify(userRepository).findByEmail("iddera@iddera.com");
     }
 
     @Test
     void resetPasswordSuccess() {
         Locale locale = new Locale("en");
-        when(userRepository.findById(eq(1L)))
+        when(userRepository.findByEmail("iddera@iddera.com"))
                 .thenReturn(Optional.of(user()));
         when(userRepository.save(any()))
                 .thenReturn(user());
-        when(userForgotPasswordTokenRepository.findByUsername("iddera"))
+        when(userForgotPasswordTokenRepository.findByActivationToken("123456789"))
                 .thenReturn(Optional.of(buildUserForgottenPassword()));
-        UserModel result = userService.resetPassword(1L, buildForgotPasswordRequest(), locale).join();
+
+        UserModel result = userService.resetPassword(buildForgotPasswordRequest(), locale).join();
+
         assertUserValues(result);
-        verify(userRepository).findById(1L);
+        verify(userRepository).findByEmail("iddera@iddera.com");
         verify(userRepository).save(any());
+        verify(userForgotPasswordTokenRepository).deleteById(anyLong());
     }
 
     @Test
     void resetPasswordFailedTokenNotFound() {
         Locale locale = new Locale("en");
-        when(userRepository.findById(eq(1L)))
-                .thenReturn(Optional.of(user()));
-
-        when(userForgotPasswordTokenRepository.findByUsername("iddera"))
+        when(userForgotPasswordTokenRepository.findByActivationToken("123456789"))
                 .thenReturn(Optional.empty());
-        CompletableFuture<UserModel> result = userService.resetPassword(1L, buildForgotPasswordRequest(), locale);
+        CompletableFuture<UserModel> result = userService.resetPassword(buildForgotPasswordRequest(), locale);
 
         assertThatThrownBy(result::join)
                 .isInstanceOf(CompletionException.class)
                 .hasCause(new UserManagementException("Invalid token"))
                 .extracting(Throwable::getCause)
                 .hasFieldOrPropertyWithValue("code", BAD_REQUEST.value());
-        verify(userForgotPasswordTokenRepository).findByUsername(eq("iddera"));
-        verify(userRepository).findById(1L);
-    }
 
-    @Test
-    void resetPasswordFailedTokenNotMatch() {
-        Locale locale = new Locale("en");
-        when(userRepository.findById(eq(1L)))
-                .thenReturn(Optional.of(user()));
-
-        when(userForgotPasswordTokenRepository.findByUsername("iddera"))
-                .thenReturn(Optional.of(buildUserForgottenPassword()));
-        ForgotPasswordRequest forgotPasswordRequest = buildForgotPasswordRequest();
-        forgotPasswordRequest.setToken("987654321");
-        CompletableFuture<UserModel> result = userService.resetPassword(1L, forgotPasswordRequest, locale);
-
-        assertThatThrownBy(result::join)
-                .isInstanceOf(CompletionException.class)
-                .hasCause(new UserManagementException("Invalid token"))
-                .extracting(Throwable::getCause)
-                .hasFieldOrPropertyWithValue("code", BAD_REQUEST.value());
-        verify(userForgotPasswordTokenRepository).findByUsername(eq("iddera"));
-        verify(userRepository).findById(1L);
+        verify(userForgotPasswordTokenRepository).findByActivationToken("123456789");
     }
 
     @Test
     void resetPasswordFailsWrongUsername() {
-        when(userRepository.findById(eq(1L)))
+        when(userRepository.findByEmail("iddera@iddera.com"))
                 .thenReturn(Optional.empty());
+        when(userRepository.save(any()))
+                .thenReturn(user());
+        when(userForgotPasswordTokenRepository.findByActivationToken("123456789"))
+                .thenReturn(Optional.of(buildUserForgottenPassword()));
 
-
-        CompletableFuture<UserModel> result = userService.resetPassword(1L, buildForgotPasswordRequest(), new Locale("en"));
-
+        CompletableFuture<UserModel> result = userService.resetPassword(buildForgotPasswordRequest(), new Locale("en"));
 
         assertThatThrownBy(result::join)
                 .isInstanceOf(CompletionException.class)
-                .hasCause(new UserManagementException("User does not exist"))
+                .hasCause(new UserManagementException("User iddera@iddera.com not found"))
                 .extracting(Throwable::getCause)
                 .hasFieldOrPropertyWithValue("code", BAD_REQUEST.value());
-        verify(userRepository).findById(eq(1L));
     }
 
     private Role role() {
@@ -532,7 +495,6 @@ class DefaultUserServiceTest {
                 .setLastName("Lastname")
                 .setUsername("iddera")
                 .setEmail("email@email.com")
-                .setDateOfBirth(LocalDate.now())
                 .setType(UserType.ADMIN)
                 .setPassword("iddera")
                 .setRoles(singletonList(role()));
@@ -558,12 +520,14 @@ class DefaultUserServiceTest {
                 .setLastName("Lastname")
                 .setUsername("iddera")
                 .setEmail("email@email.com")
-                .setDateOfBirth(LocalDate.now())
                 .setRoleId(1L)
                 .setType(UserType.ADMIN)
                 .setPassword("iddera")
-                .setConfirmPassword("iddera")
-                .setGender(Gender.MALE);
+                .setConfirmPassword("iddera");
+    }
+
+    private EmailModel emailModel() {
+        return new EmailModel("iddera@iddera.com");
     }
 
     private UserUpdateRequest buildUserUpdateRequest() {
@@ -593,7 +557,7 @@ class DefaultUserServiceTest {
 
     private UserForgotPasswordToken buildUserForgottenPassword() {
         return new UserForgotPasswordToken()
-                .setUsername("iddera")
+                .setUsername("iddera@iddera.com")
                 .setActivationToken("123456789")
                 .setId(1L);
     }
@@ -601,8 +565,7 @@ class DefaultUserServiceTest {
     private UserActivationToken buildUserActivationToken() {
         return new UserActivationToken()
                 .setActivationToken("123456789")
-                .setUsername("iddera")
+                .setUsername("iddera@iddera.com")
                 .setId(1L);
     }
-
 }

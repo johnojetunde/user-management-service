@@ -4,9 +4,7 @@ import com.iddera.client.model.Page;
 import com.iddera.client.model.ResponseModel;
 import com.iddera.client.util.ErrorHandler;
 import com.iddera.usermanagement.client.retrofits.UserClient;
-import com.iddera.usermanagement.lib.app.request.ChangeUserPasswordRequest;
-import com.iddera.usermanagement.lib.app.request.UserRequest;
-import com.iddera.usermanagement.lib.app.request.UserVerificationRequest;
+import com.iddera.usermanagement.lib.app.request.*;
 import com.iddera.usermanagement.lib.domain.model.LoginModel;
 import com.iddera.usermanagement.lib.domain.model.OauthToken;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
@@ -27,14 +25,21 @@ public class Users {
                                                @NonNull String clientSecret,
                                                @NonNull LoginModel loginModel) {
 
-        String clientAuthDetails = clientId + ":" + clientSecret;
-        String basicAuth = getEncoder().encodeToString(clientAuthDetails.getBytes());
-
-        String basicHeaderAuth = "Basic " + basicAuth;
+        String basicHeaderAuth = generateBasicAuth(clientId, clientSecret);
         return userClient.login(basicHeaderAuth,
                 "password",
                 loginModel.getUsername(),
                 loginModel.getPassword());
+    }
+
+    public CompletableFuture<OauthToken> refreshToken(@NonNull String clientId,
+                                                      @NonNull String clientSecret,
+                                                      @NonNull String refreshToken) {
+
+        String basicHeaderAuth = generateBasicAuth(clientId, clientSecret);
+        return userClient.refreshToken(basicHeaderAuth,
+                "refresh_token",
+                refreshToken);
     }
 
     public CompletableFuture<ResponseModel<UserModel>> create(@NonNull UserRequest request) {
@@ -42,13 +47,17 @@ public class Users {
                 .handleAsync(ErrorHandler::handleException);
     }
 
-    public CompletableFuture<ResponseModel<UserModel>> getById(@NonNull Long id) {
-        return userClient.getById(id)
+    public CompletableFuture<ResponseModel<UserModel>> getById(@NonNull Long id,
+                                                               @NonNull String token) {
+        String bearerToken = bearerToken(token);
+        return userClient.getById(id, bearerToken)
                 .handleAsync(ErrorHandler::handleException);
     }
 
-    public CompletableFuture<ResponseModel<UserModel>> getByUsername(@NonNull String username) {
-        return userClient.getByUsername(username)
+    public CompletableFuture<ResponseModel<UserModel>> getByUsername(@NonNull String username,
+                                                                     @NonNull String token) {
+        String bearerToken = bearerToken(token);
+        return userClient.getByUsername(username, bearerToken)
                 .handleAsync(ErrorHandler::handleException);
     }
 
@@ -62,15 +71,38 @@ public class Users {
                 .handleAsync(ErrorHandler::handleException);
     }
 
+    public CompletableFuture<ResponseModel<UserModel>> initiateResetPassword(@NonNull EmailModel request) {
+        return userClient.initiateResetPassword(request)
+                .handleAsync(ErrorHandler::handleException);
+    }
+
+    public CompletableFuture<ResponseModel<UserModel>> resetPassword(@NonNull ForgotPasswordRequest request) {
+        return userClient.resetPassword(request)
+                .handleAsync(ErrorHandler::handleException);
+    }
+
     public CompletableFuture<ResponseModel<Page<UserModel>>> getAll(Long pageNumber,
-                                                                    Long pageSize) {
-        return userClient.getAll(pageNumber, pageSize)
+                                                                    Long pageSize,
+                                                                    @NonNull String token) {
+        String bearerToken = bearerToken(token);
+        return userClient.getAll(pageNumber, pageSize, bearerToken)
                 .handleAsync(ErrorHandler::handleException);
     }
 
     public CompletableFuture<ResponseModel<UserModel>> getUserDetails(@NonNull String token) {
-        String bearerToken = BEARER.concat(token);
+        String bearerToken = bearerToken(token);
         return userClient.getUserDetails(bearerToken)
                 .handleAsync(ErrorHandler::handleException);
+    }
+
+    private String generateBasicAuth(@NonNull String clientId, @NonNull String clientSecret) {
+        String clientAuthDetails = clientId + ":" + clientSecret;
+        String basicAuth = getEncoder().encodeToString(clientAuthDetails.getBytes());
+
+        return "Basic " + basicAuth;
+    }
+
+    private String bearerToken(String token) {
+        return BEARER.concat(token);
     }
 }

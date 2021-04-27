@@ -3,13 +3,10 @@ package com.iddera.usermanagement.client;
 import com.iddera.client.model.ResponseModel;
 import com.iddera.client.provider.RetrofitProvider;
 import com.iddera.usermanagement.lib.app.request.UserRequest;
-import com.iddera.usermanagement.lib.domain.model.Gender;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
 import com.iddera.usermanagement.lib.domain.model.UserType;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -50,8 +47,6 @@ class UserManagementClientTest {
         UserManagementClient userManagementClient = new UserManagementClient(retrofitProvider, "https://iddera-user-management-api.herokuapp.com/");
         var request = new UserRequest()
                 .setEmail("hello@hello.com")
-                .setDateOfBirth(LocalDate.now())
-                .setGender(Gender.MALE)
                 .setFirstName("Iddera")
                 .setLastName("Health")
                 .setUsername("hello@iddera.com")

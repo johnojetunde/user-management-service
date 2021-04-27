@@ -25,7 +25,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
@@ -99,9 +102,7 @@ public class DefaultUserService implements UserService, UserPasswordService {
                     .setEmail(request.getEmail())
                     .setFirstName(request.getFirstName())
                     .setLastName(request.getLastName())
-                    .setDateOfBirth(request.getDateOfBirth())
                     .setType(request.getType())
-                    .setGender(request.getGender())
                     .setRoles(singletonList(role));
 
             return userRepository.save(user).toModel();
@@ -132,11 +133,12 @@ public class DefaultUserService implements UserService, UserPasswordService {
     }
 
     @Override
-    public CompletableFuture<UserModel> forgotPassword(String username, Locale locale) {
+    public CompletableFuture<UserModel> initiatePasswordReset(EmailModel emailModel, Locale locale) {
         return supplyAsync(() -> {
-            User user = getUser(username);
-            String token = createActivationTokenForUser(user.getUsername());
-            String emailHtml = buildForgotPasswordMail(token, locale, username);
+            User user = getUserByEmail(emailModel.getEmail());
+
+            String token = createForgotTokenForUser(user.getUsername());
+            String emailHtml = buildForgotPasswordMail(token, locale, user.getUsername());
             emailService.sendEmailToOneAddress(emailHtml,
                     "Forgot your password?",
                     user.getEmail(),
@@ -167,18 +169,14 @@ public class DefaultUserService implements UserService, UserPasswordService {
     @Override
     public CompletableFuture<UserModel> verifyUser(UserVerificationRequest userVerificationRequest) {
         return supplyAsync(() -> {
-            User user = getUser(userVerificationRequest.getUsername());
-
-            UserActivationToken userActivationToken = Optional.ofNullable(userActivationTokenRepository
-                    .findByUsername(userVerificationRequest.getUsername()))
+            UserActivationToken userActivationToken = userActivationTokenRepository.findByActivationToken(userVerificationRequest.getToken())
                     .orElseThrow(() -> exceptions.handleCreateBadRequest("Invalid token"));
 
-            ensureTokenExist(userVerificationRequest, userActivationToken);
-
+            User user = getUserByEmail(userActivationToken.getUsername());
             user.setStatus(ACTIVE);
-            var savedUser = userRepository.save(user);
 
-            return savedUser.toModel();
+            userActivationTokenRepository.deleteById(userActivationToken.getId());
+            return userRepository.save(user).toModel();
         }, executor);
     }
 
@@ -187,26 +185,22 @@ public class DefaultUserService implements UserService, UserPasswordService {
         return supplyAsync(() ->
                 userRepository.findByUsername(principal.getName())
                         .map(User::toModel)
-                        .orElseThrow(
-                                () -> exceptions.handleCreateNotFoundException("User not found", principal.getName())));
+                        .orElseThrow(() -> exceptions.handleCreateNotFoundException("User not found", principal.getName())));
     }
 
     @Override
-    public CompletableFuture<UserModel> resetPassword(Long id,
-                                                      ForgotPasswordRequest forgotPasswordRequest,
+    public CompletableFuture<UserModel> resetPassword(ForgotPasswordRequest request,
                                                       Locale locale) {
         return supplyAsync(() -> {
-            User user = getUser(id, () -> exceptions.handleCreateBadRequest("User does not exist"));
-            UserForgotPasswordToken userForgotPasswordToken = userForgotPasswordTokenRepository.findByUsername(user.getUsername())
+            UserForgotPasswordToken userForgotPasswordToken = userForgotPasswordTokenRepository.findByActivationToken(request.getToken())
                     .orElseThrow(() -> exceptions.handleCreateBadRequest("Invalid token"));
 
-            if (!forgotPasswordRequest.getToken().equals(userForgotPasswordToken.getActivationToken()))
-                throw exceptions.handleCreateBadRequest("Invalid token");
-
-            String hashedPassword = encoder.encode(forgotPasswordRequest.getNewPassword());
+            User user = getUserByEmail(userForgotPasswordToken.getUsername());
+            String hashedPassword = encoder.encode(request.getNewPassword());
             user.setPassword(hashedPassword);
-            user = userRepository.save(user);
-            return user.toModel();
+
+            userForgotPasswordTokenRepository.deleteById(userForgotPasswordToken.getId());
+            return userRepository.save(user).toModel();
         }, executor);
     }
 
@@ -223,9 +217,7 @@ public class DefaultUserService implements UserService, UserPasswordService {
                     .setEmail(request.getEmail())
                     .setUsername(request.getUsername())
                     .setPassword(encoder.encode(request.getPassword()))
-                    .setDateOfBirth(request.getDateOfBirth())
                     .setRoles(List.of(role))
-                    .setGender(request.getGender())
                     .setType(request.getType())
                     .setStatus((isUser) ? INACTIVE : ACTIVE);
 
@@ -311,11 +303,23 @@ public class DefaultUserService implements UserService, UserPasswordService {
     }
 
     private String createActivationTokenForUser(String username) {
+        var token = tokenGenerationService.generateToken();
         UserActivationToken userActivationToken = new UserActivationToken();
         userActivationToken.setUsername(username);
-        userActivationToken.setActivationToken(tokenGenerationService.generateToken());
-        userActivationToken = userActivationTokenRepository.save(userActivationToken);
-        return userActivationToken.getActivationToken();
+        userActivationToken.setActivationToken(token);
+
+        userActivationTokenRepository.save(userActivationToken);
+        return token;
+    }
+
+    private String createForgotTokenForUser(String username) {
+        var token = tokenGenerationService.generateToken();
+        UserForgotPasswordToken forgotPasswordToken = new UserForgotPasswordToken();
+        forgotPasswordToken.setUsername(username);
+        forgotPasswordToken.setActivationToken(token);
+
+        userForgotPasswordTokenRepository.save(forgotPasswordToken);
+        return token;
     }
 
     private Map<String, Object> getForgotPasswordProperties(String token, String username) {
@@ -355,6 +359,11 @@ public class DefaultUserService implements UserService, UserPasswordService {
     private User getUser(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> exceptions.handleCreateBadRequest("User %s not found", username));
+    }
+
+    private User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> exceptions.handleCreateBadRequest("User %s not found", email));
     }
 
     private void ensureTokenExist(UserVerificationRequest userVerificationRequest,

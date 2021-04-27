@@ -1,5 +1,6 @@
 package com.iddera.usermanagement.api.app.config.security;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -11,15 +12,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collection;
 
+@RequiredArgsConstructor
 public class IdderaConcurrentSessions implements SessionAuthenticationStrategy {
 
     private final TokenStore tokenStore;
     private final String resourceId;
-
-    public IdderaConcurrentSessions(TokenStore tokenStore, String resourceId) {
-        this.tokenStore = tokenStore;
-        this.resourceId = resourceId;
-    }
 
     @Override
     public void onAuthentication(Authentication authentication, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws SessionAuthenticationException {

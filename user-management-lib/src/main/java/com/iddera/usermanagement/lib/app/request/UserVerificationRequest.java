@@ -11,8 +11,7 @@ import javax.validation.constraints.NotBlank;
 @Data
 public class UserVerificationRequest {
     @NotBlank(message = "Firstname is required")
-    String token;
-
+    private String token;
     @NotBlank(message = "Username is required")
     private String username;
 }

@@ -84,17 +84,23 @@
 
 
     <changeSet author="tajia (generated)" id="1607447444421-11">
-        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="user_role" constraintName="FK859n2jvi8ivhui0rl0esws6o-01" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="user" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="user_role"
+                                 constraintName="FK859n2jvi8ivhui0rl0esws6o-01" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="user" validate="true"/>
     </changeSet>
     <changeSet author="tajia (generated)" id="1607447444421-12">
-        <addForeignKeyConstraint baseColumnNames="role_id" baseTableName="user_role" constraintName="FKa68196081fvovjhkek5m97n3y=01" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="role" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="role_id" baseTableName="user_role"
+                                 constraintName="FKa68196081fvovjhkek5m97n3y=01" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="role" validate="true"/>
     </changeSet>
 
 
     <changeSet author="tajia (generated)" id="1607514377425-18">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="oauth_client_details" />
+                <tableExists tableName="oauth_client_details"/>
             </not>
         </preConditions>
         <createTable tableName="oauth_client_details">
@@ -114,7 +120,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet  author="tajia"  id="202009121306-01">
+    <changeSet author="tajia" id="202009121306-01">
         <insert tableName="oauth_client_details">
             <column name="client_id" value="ogirs-client"/>
             <column name="client_secret" value="$2a$10$/49pmpi3XtJbT74rTuo6luEJyXhy05w266bbPx7o1x8ns7DC4B1VC"/>
@@ -156,12 +162,12 @@
     </changeSet>
     <changeSet author="tajia" id="202009122308-03">
         <addColumn tableName="user">
-        <column name="status" type="VARCHAR(255)" > </column>
+            <column name="status" type="VARCHAR(255)"></column>
         </addColumn>
     </changeSet>
 
 
-    <changeSet  author="oakinrele"  id="202104061238-01">
+    <changeSet author="oakinrele" id="202104061238-01">
         <insert tableName="oauth_client_details">
             <column name="client_id" value="iddera-client"/>
             <column name="client_secret" value="$2a$10$WYRVVR0AWndE2Ky0NKSv3epnJiQuLQN8EhHS5kKBs09zeuAKcro1e"/>
@@ -175,15 +181,15 @@
     </changeSet>
 
 
-    <changeSet author="oakinrele"  id="202009121306-02">
+    <changeSet author="oakinrele" id="202009121306-02">
         <delete tableName="oauth_client_details">
             <where>client_id='ogirs-client'</where>
         </delete>
     </changeSet>
 
-    <changeSet author="oakinrele"  id="202104071607-01">
+    <changeSet author="oakinrele" id="202104071607-01">
         <preConditions onFail="MARK_RAN">
-                <tableExists tableName="oauth_client_details" />
+            <tableExists tableName="oauth_client_details"/>
         </preConditions>
         <dropTable tableName="oauth_client_details"/>
     </changeSet>
@@ -191,7 +197,7 @@
     <changeSet author="oakinrele" id="202104071607-02">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="oauth_client_details" />
+                <tableExists tableName="oauth_client_details"/>
             </not>
         </preConditions>
         <createTable tableName="oauth_client_details">
@@ -214,7 +220,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet  author="oakinrele"  id="202104071607-03">
+    <changeSet author="oakinrele" id="202104071607-03">
         <insert tableName="oauth_client_details">
             <column name="id" value="1"/>
             <column name="client_id" value="iddera-client"/>
@@ -226,6 +232,16 @@
             <column name="access_token_validity" value="31536000"/>
             <column name="refresh_token_validity" value="2592000"/>
         </insert>
+    </changeSet>
+
+    <changeSet author="johnojetunde" id="202104227035-01">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="user" columnName="date_of_birth"/>
+        </preConditions>
+        <dropColumn columnName="date_of_birth" tableName="user">
+            <column name="date_of_birth"/>
+            <column name="gender"/>
+        </dropColumn>
     </changeSet>
 
 </databaseChangeLog>

@@ -2,9 +2,7 @@ package com.iddera.usermanagement.client.retrofits;
 
 import com.iddera.client.model.Page;
 import com.iddera.client.model.ResponseModel;
-import com.iddera.usermanagement.lib.app.request.ChangeUserPasswordRequest;
-import com.iddera.usermanagement.lib.app.request.UserRequest;
-import com.iddera.usermanagement.lib.app.request.UserVerificationRequest;
+import com.iddera.usermanagement.lib.app.request.*;
 import com.iddera.usermanagement.lib.domain.model.OauthToken;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
 import retrofit2.http.*;
@@ -12,7 +10,7 @@ import retrofit2.http.*;
 import java.util.concurrent.CompletableFuture;
 
 public interface UserClient {
-    @POST("users/send-now")
+    @POST("users")
     CompletableFuture<ResponseModel<UserModel>> create(@Body UserRequest request);
 
     @FormUrlEncoded
@@ -22,21 +20,36 @@ public interface UserClient {
                                         @Field("username") String username,
                                         @Field("password") String password);
 
+    @FormUrlEncoded
+    @POST("oauth/token")
+    CompletableFuture<OauthToken> refreshToken(@Header("Authorization") String basicAuthorization,
+                                               @Field("grant_type") String grantType,
+                                               @Field("refresh_token") String refreshToken);
+
     @GET("users/{id}")
-    CompletableFuture<ResponseModel<UserModel>> getById(@Path("id") Long id);
+    CompletableFuture<ResponseModel<UserModel>> getById(@Path("id") Long id,
+                                                        @Header("Authorization") String bearerToken);
 
     @POST("users/{id}/change-password")
     CompletableFuture<ResponseModel<UserModel>> changePassword(@Path("id") Long id, @Body ChangeUserPasswordRequest request);
 
     @GET("users/usernames/{username}")
-    CompletableFuture<ResponseModel<UserModel>> getByUsername(@Path("username") String username);
+    CompletableFuture<ResponseModel<UserModel>> getByUsername(@Path("username") String username,
+                                                              @Header("Authorization") String bearerToken);
 
     @POST("users/verify-email")
     CompletableFuture<ResponseModel<UserModel>> verifyEmail(@Body UserVerificationRequest request);
 
+    @POST("users/reset-password/initiate")
+    CompletableFuture<ResponseModel<UserModel>> initiateResetPassword(@Body EmailModel request);
+
+    @POST("users/reset-password/update")
+    CompletableFuture<ResponseModel<UserModel>> resetPassword(@Body ForgotPasswordRequest request);
+
     @GET("users/")
     CompletableFuture<ResponseModel<Page<UserModel>>> getAll(@Query("page") Long pageNumber,
-                                                             @Query("size") Long pageSize);
+                                                             @Query("size") Long pageSize,
+                                                             @Header("Authorization") String bearerToken);
 
     @GET("users/current")
     CompletableFuture<ResponseModel<UserModel>> getUserDetails(@Header("Authorization") String bearerToken);

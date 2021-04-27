@@ -30,7 +30,6 @@ public class UserUpdateRequest {
     @NotNull
     @ValidEnum(message = "Invalid UserType")
     private UserType type;
-    @NotNull
     private Long roleId;
     @NotNull
     @ValidEnum(message = "Invalid value for gender")

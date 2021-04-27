@@ -16,15 +16,10 @@ import java.io.Serializable;
 @Accessors(chain = true)
 @AllArgsConstructor
 public class UserForgotPasswordToken implements Serializable {
-
     @Id
     private Long id;
-
     @Indexed
     private String username;
-
     @Indexed
     private String activationToken;
-
-
 }

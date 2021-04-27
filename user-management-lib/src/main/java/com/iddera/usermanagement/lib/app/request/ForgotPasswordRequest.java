@@ -17,10 +17,8 @@ import javax.validation.constraints.NotBlank;
 public class ForgotPasswordRequest {
     @NotBlank(message = "Token is required")
     String token;
-
     @NotBlank(message = "New password is required")
     String newPassword;
-
     @NotBlank(message = "Confirmed new password is required")
     String confirmPassword;
 }
