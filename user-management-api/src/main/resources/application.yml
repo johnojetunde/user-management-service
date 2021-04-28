@@ -32,10 +32,11 @@ logging:
   logback:
     rollingpolicy:
       max-file-size: 50MB
-swagger-auth-link: ${SWAGGER_AUTH_LINK:http://127.0.0.1:8080}
 
+swagger-auth-link: ${SWAGGER_AUTH_LINK:http://127.0.0.1:8080}
 user-activation-url: ${USER_ACTIVATION_URL:http://localhost:8080/users/verify-email}
 notification-client-url: ${NOTIFICATION_URL:https://iddera-notification-api.herokuapp.com/}
+
 iddera:
   client:
     notification-url: ${NOTIFICATION_URL:https://iddera-notification-api.herokuapp.com/}
@@ -47,5 +48,4 @@ iderra:
   email:
     user-activation-url: ${USER_ACTIVATION_URL:http://localhost:8080/users/verify-email}
     user-forgot-password-url: ${USER_FORGOT_PASSWORD_URL:http://localhost:8080/users/reset-password}
-
 
