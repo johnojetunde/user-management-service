@@ -12,7 +12,7 @@
     <groupId>com.iddera</groupId>
     <artifactId>user-management-service</artifactId>
     <packaging>pom</packaging>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <modules>
         <module>user-management-lib</module>
         <module>user-management-client</module>

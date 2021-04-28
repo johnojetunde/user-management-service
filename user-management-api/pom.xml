@@ -5,10 +5,10 @@
     <parent>
         <artifactId>user-management-service</artifactId>
         <groupId>com.iddera</groupId>
-        <version>1.0</version>
+        <version>1.0.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    <version>1.0.1</version>
     <artifactId>user-management-api</artifactId>
 
     <properties>
