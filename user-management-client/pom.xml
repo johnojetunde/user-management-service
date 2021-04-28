@@ -39,7 +39,7 @@
         <dependency>
             <groupId>com.iddera</groupId>
             <artifactId>api-client-lib</artifactId>
-            <version>1.0</version>
+            <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>com.iddera</groupId>
