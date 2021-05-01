@@ -1,12 +1,14 @@
 package com.iddera.usermanagement.api.app.controller;
 
 
+import com.iddera.commons.annotation.ValidEnum;
 import com.iddera.usermanagement.api.app.model.ResponseModel;
 import com.iddera.usermanagement.api.app.model.UserResult;
 import com.iddera.usermanagement.api.domain.service.abstracts.UserPasswordService;
 import com.iddera.usermanagement.api.domain.service.abstracts.UserService;
 import com.iddera.usermanagement.lib.app.request.*;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
+import com.iddera.usermanagement.lib.domain.model.UserType;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
@@ -68,7 +70,7 @@ public class UserController {
 
     @GetMapping("/usernames/{username}")
     @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
-    public CompletableFuture<ResponseModel> get(@PathVariable String username) {
+    public CompletableFuture<ResponseModel> getByUsername(@PathVariable String username) {
         return userService.getByUserName(username)
                 .thenApply(ResponseModel::new);
     }
@@ -82,8 +84,9 @@ public class UserController {
 
     @GetMapping
     @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserResult.class)})
-    public CompletableFuture<ResponseModel> get(@PageableDefault Pageable pageable) {
-        return userService.getAll(pageable)
+    public CompletableFuture<ResponseModel> getAll(@PageableDefault Pageable pageable,
+                                                   @Valid @ValidEnum @RequestParam(value = "userType", required = false) UserType userType) {
+        return userService.getAll(userType, pageable)
                 .thenApply(UserResult::new)
                 .thenApply(ResponseModel::new);
     }

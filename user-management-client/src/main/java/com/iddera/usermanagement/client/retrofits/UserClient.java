@@ -5,6 +5,7 @@ import com.iddera.client.model.ResponseModel;
 import com.iddera.usermanagement.lib.app.request.*;
 import com.iddera.usermanagement.lib.domain.model.OauthToken;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
+import com.iddera.usermanagement.lib.domain.model.UserType;
 import retrofit2.http.*;
 
 import java.util.concurrent.CompletableFuture;
@@ -49,6 +50,7 @@ public interface UserClient {
     @GET("users/")
     CompletableFuture<ResponseModel<Page<UserModel>>> getAll(@Query("page") Long pageNumber,
                                                              @Query("size") Long pageSize,
+                                                             @Query("userType") UserType userType,
                                                              @Header("Authorization") String bearerToken);
 
     @GET("users/current")

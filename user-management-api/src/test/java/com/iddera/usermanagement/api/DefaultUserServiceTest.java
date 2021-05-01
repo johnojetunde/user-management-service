@@ -35,6 +35,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
+import static com.iddera.usermanagement.lib.domain.model.UserType.CLIENT;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -289,13 +290,23 @@ class DefaultUserServiceTest {
         verify(userRepository).findByUsername(eq("username"));
     }
 
-
     @Test
     void getAll() {
         when(userRepository.findAll(any(Pageable.class)))
                 .thenReturn(new PageImpl<>(singletonList(user())));
 
-        Page<UserModel> userModels = userService.getAll(mock(Pageable.class)).join();
+        Page<UserModel> userModels = userService.getAll(null, mock(Pageable.class)).join();
+
+        assertThat(userModels.getSize()).isEqualTo(1);
+        assertUserValues(userModels.getContent().get(0));
+    }
+
+    @Test
+    void getAll_ByUserType() {
+        when(userRepository.findAllByType(eq(CLIENT), isA(Pageable.class)))
+                .thenReturn(new PageImpl<>(singletonList(user())));
+
+        Page<UserModel> userModels = userService.getAll(CLIENT, mock(Pageable.class)).join();
 
         assertThat(userModels.getSize()).isEqualTo(1);
         assertUserValues(userModels.getContent().get(0));

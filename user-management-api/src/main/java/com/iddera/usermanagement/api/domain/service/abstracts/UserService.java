@@ -4,6 +4,7 @@ import com.iddera.usermanagement.lib.app.request.UserRequest;
 import com.iddera.usermanagement.lib.app.request.UserUpdateRequest;
 import com.iddera.usermanagement.lib.app.request.UserVerificationRequest;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
+import com.iddera.usermanagement.lib.domain.model.UserType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -16,7 +17,7 @@ public interface UserService {
 
     CompletableFuture<UserModel> update(Long userId, UserUpdateRequest request);
 
-    CompletableFuture<Page<UserModel>> getAll(Pageable pageable);
+    CompletableFuture<Page<UserModel>> getAll(UserType userType, Pageable pageable);
 
     CompletableFuture<UserModel> getById(Long userId);
 

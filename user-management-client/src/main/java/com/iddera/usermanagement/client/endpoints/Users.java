@@ -8,6 +8,7 @@ import com.iddera.usermanagement.lib.app.request.*;
 import com.iddera.usermanagement.lib.domain.model.LoginModel;
 import com.iddera.usermanagement.lib.domain.model.OauthToken;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
+import com.iddera.usermanagement.lib.domain.model.UserType;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -83,9 +84,10 @@ public class Users {
 
     public CompletableFuture<ResponseModel<Page<UserModel>>> getAll(Long pageNumber,
                                                                     Long pageSize,
+                                                                    UserType userType,
                                                                     @NonNull String token) {
         String bearerToken = bearerToken(token);
-        return userClient.getAll(pageNumber, pageSize, bearerToken)
+        return userClient.getAll(pageNumber, pageSize, userType, bearerToken)
                 .handleAsync(ErrorHandler::handleException);
     }
 

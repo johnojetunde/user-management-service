@@ -110,9 +110,11 @@ public class DefaultUserService implements UserService, UserPasswordService {
     }
 
     @Override
-    public CompletableFuture<Page<UserModel>> getAll(Pageable pageable) {
+    public CompletableFuture<Page<UserModel>> getAll(UserType userType, Pageable pageable) {
         return supplyAsync(() ->
-                userRepository.findAll(pageable)
+                ofNullable(userType)
+                        .map(type -> userRepository.findAllByType(type, pageable))
+                        .orElseGet(() -> userRepository.findAll(pageable))
                         .map(User::toModel));
     }
 
@@ -356,19 +358,8 @@ public class DefaultUserService implements UserService, UserPasswordService {
         return mailContentBuilder.generateMailContent(variableMap, Constants.FORGOT_PASSWORD_TEMPLATE, locale);
     }
 
-    private User getUser(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> exceptions.handleCreateBadRequest("User %s not found", username));
-    }
-
     private User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> exceptions.handleCreateBadRequest("User %s not found", email));
-    }
-
-    private void ensureTokenExist(UserVerificationRequest userVerificationRequest,
-                                  UserActivationToken userActivationToken) {
-        if (!userVerificationRequest.getToken().equals(userActivationToken.getActivationToken()))
-            throw exceptions.handleCreateBadRequest("Invalid token");
     }
 }
