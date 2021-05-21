@@ -15,6 +15,7 @@ import com.iddera.usermanagement.api.persistence.repository.UserRepository;
 import com.iddera.usermanagement.api.persistence.repository.redis.UserActivationTokenRepository;
 import com.iddera.usermanagement.api.persistence.repository.redis.UserForgotPasswordTokenRepository;
 import com.iddera.usermanagement.lib.app.request.*;
+import com.iddera.usermanagement.lib.domain.model.EntityStatus;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
 import com.iddera.usermanagement.lib.domain.model.UserType;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -106,6 +107,19 @@ public class DefaultUserService implements UserService, UserPasswordService {
                     .setType(request.getType())
                     .setRoles(singletonList(role));
 
+            return userRepository.save(user).toModel();
+        }, executor);
+    }
+
+    @Transactional
+    @Override
+    public CompletableFuture<UserModel> deactivate(Long userId){
+        return supplyAsync(() -> {
+            User user = getUser(userId, () -> exceptions.handleCreateBadRequest("User does not exist"));
+            if(user.getStatus() == INACTIVE){
+                throw exceptions.handleCreateBadRequest("User has already been deactivated.");
+            }
+            user.setStatus(INACTIVE);
             return userRepository.save(user).toModel();
         }, executor);
     }

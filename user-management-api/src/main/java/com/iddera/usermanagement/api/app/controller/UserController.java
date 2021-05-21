@@ -38,6 +38,20 @@ public class UserController {
                 .thenApply(ResponseModel::new);
     }
 
+    @PostMapping("/{userId}/update")
+    @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
+    public CompletableFuture<ResponseModel> update(@PathVariable Long userId, @Valid @RequestBody UserUpdateRequest request) {
+        return userService.update(userId, request)
+                .thenApply(ResponseModel::new);
+    }
+
+    @PostMapping("/{userId}/deactivate")
+    @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
+    public CompletableFuture<ResponseModel> deactivate(@PathVariable Long userId) {
+        return userService.deactivate(userId)
+                .thenApply(ResponseModel::new);
+    }
+
     @GetMapping("/{id}")
     @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
     public CompletableFuture<ResponseModel> get(@PathVariable Long id) {

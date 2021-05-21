@@ -18,6 +18,7 @@ import com.iddera.usermanagement.api.persistence.repository.UserRepository;
 import com.iddera.usermanagement.api.persistence.repository.redis.UserActivationTokenRepository;
 import com.iddera.usermanagement.api.persistence.repository.redis.UserForgotPasswordTokenRepository;
 import com.iddera.usermanagement.lib.app.request.*;
+import com.iddera.usermanagement.lib.domain.model.EntityStatus;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
 import com.iddera.usermanagement.lib.domain.model.UserType;
 import org.junit.jupiter.api.BeforeEach;
@@ -494,6 +495,48 @@ class DefaultUserServiceTest {
     }
 
     @Test
+    void deactivateUserFails_WhenUserDoesNotExist(){
+        User user = user();
+        user.setId(2L);
+        when(userRepository.findById(any(Long.class)))
+                .thenReturn(findById(List.of(user)));
+
+        var result = userService.deactivate(user.getId());
+        assertThatThrownBy(result::join)
+                .isInstanceOf(CompletionException.class)
+                .hasCause(new UserManagementException("User does not exist"))
+                .extracting(Throwable::getCause)
+                .hasFieldOrPropertyWithValue("code", BAD_REQUEST.value());
+    }
+
+    @Test
+    void deactivateUserFails_WhenUserIsAlreadyDeactivated(){
+        User user = user();
+        user.setStatus(EntityStatus.INACTIVE);
+        when(userRepository.findById(any(Long.class)))
+                .thenReturn(Optional.of(user));
+
+        var result = userService.deactivate(user.getId());
+
+        assertThatThrownBy(result::join)
+                .isInstanceOf(CompletionException.class)
+                .hasCause(new UserManagementException("User has already been deactivated."))
+                .extracting(Throwable::getCause)
+                .hasFieldOrPropertyWithValue("code", BAD_REQUEST.value());
+    }
+
+    @Test
+    void deactivateUser_Successfully(){
+        when(userRepository.findById(any(Long.class)))
+                .thenReturn(Optional.of(user()));
+        when(userRepository.save(any()))
+                .thenReturn(user());
+
+        var result = userService.deactivate(user().getId()).join();
+        assertUserValues(result);
+    }
+
+    @Test
     void getAllByIds() {
         var ids = List.of(1L, 2L);
         when(userRepository.findAllById(ids))
@@ -522,7 +565,8 @@ class DefaultUserServiceTest {
                 .setEmail("email@email.com")
                 .setType(UserType.ADMIN)
                 .setPassword("iddera")
-                .setRoles(singletonList(role()));
+                .setRoles(singletonList(role()))
+                .setStatus(EntityStatus.ACTIVE);
         user.setId(1L);
         return user;
     }
@@ -592,5 +636,11 @@ class DefaultUserServiceTest {
                 .setActivationToken("123456789")
                 .setUsername("iddera@iddera.com")
                 .setId(1L);
+    }
+
+    private Optional<User> findById(List<User> users){
+        return users.stream()
+                .filter(user -> user.getId() == 1L)
+                .findFirst();
     }
 }
