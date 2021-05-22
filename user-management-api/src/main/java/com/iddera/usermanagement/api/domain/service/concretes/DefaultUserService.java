@@ -120,7 +120,14 @@ public class DefaultUserService implements UserService, UserPasswordService {
                 throw exceptions.handleCreateBadRequest("User has already been deactivated.");
             }
             user.setStatus(INACTIVE);
-            return userRepository.save(user).toModel();
+            user  =  userRepository.save(user);
+
+            emailService.sendEmailToOneAddress(
+                    "Your account has been successfully deactivated.",
+                    "User Deactivated",
+                    user.getEmail(),
+                    "notification@iddera.com");
+            return  user.toModel();
         }, executor);
     }
 

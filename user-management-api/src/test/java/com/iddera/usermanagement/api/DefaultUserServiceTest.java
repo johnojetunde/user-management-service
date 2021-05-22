@@ -531,6 +531,8 @@ class DefaultUserServiceTest {
                 .thenReturn(Optional.of(user()));
         when(userRepository.save(any()))
                 .thenReturn(user());
+        when(emailService.sendEmailToOneAddress(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(true);
 
         var result = userService.deactivate(user().getId()).join();
         assertUserValues(result);
