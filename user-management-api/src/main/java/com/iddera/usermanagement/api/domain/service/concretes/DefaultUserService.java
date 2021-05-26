@@ -15,7 +15,6 @@ import com.iddera.usermanagement.api.persistence.repository.UserRepository;
 import com.iddera.usermanagement.api.persistence.repository.redis.UserActivationTokenRepository;
 import com.iddera.usermanagement.api.persistence.repository.redis.UserForgotPasswordTokenRepository;
 import com.iddera.usermanagement.lib.app.request.*;
-import com.iddera.usermanagement.lib.domain.model.EntityStatus;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
 import com.iddera.usermanagement.lib.domain.model.UserType;
 import org.springframework.beans.factory.annotation.Qualifier;

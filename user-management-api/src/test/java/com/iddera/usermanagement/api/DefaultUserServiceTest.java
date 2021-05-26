@@ -18,7 +18,6 @@ import com.iddera.usermanagement.api.persistence.repository.UserRepository;
 import com.iddera.usermanagement.api.persistence.repository.redis.UserActivationTokenRepository;
 import com.iddera.usermanagement.api.persistence.repository.redis.UserForgotPasswordTokenRepository;
 import com.iddera.usermanagement.lib.app.request.*;
-import com.iddera.usermanagement.lib.domain.model.EntityStatus;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
 import com.iddera.usermanagement.lib.domain.model.UserType;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +46,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static com.iddera.usermanagement.lib.domain.model.EntityStatus.ACTIVE;
+import static com.iddera.usermanagement.lib.domain.model.EntityStatus.INACTIVE;
 
 class DefaultUserServiceTest {
     @Mock
@@ -512,7 +513,7 @@ class DefaultUserServiceTest {
     @Test
     void deactivateUserFails_WhenUserIsAlreadyDeactivated(){
         User user = user();
-        user.setStatus(EntityStatus.INACTIVE);
+        user.setStatus(INACTIVE);
         when(userRepository.findById(any(Long.class)))
                 .thenReturn(Optional.of(user));
 
@@ -568,7 +569,7 @@ class DefaultUserServiceTest {
                 .setType(UserType.ADMIN)
                 .setPassword("iddera")
                 .setRoles(singletonList(role()))
-                .setStatus(EntityStatus.ACTIVE);
+                .setStatus(ACTIVE);
         user.setId(1L);
         return user;
     }
