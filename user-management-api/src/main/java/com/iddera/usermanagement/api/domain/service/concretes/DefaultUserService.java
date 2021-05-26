@@ -116,7 +116,7 @@ public class DefaultUserService implements UserService, UserPasswordService {
     public CompletableFuture<UserModel> deactivate(Long userId){
         return supplyAsync(() -> {
             User user = getUser(userId, () -> exceptions.handleCreateBadRequest("User does not exist"));
-            if(user.getStatus() == INACTIVE){
+            if(INACTIVE.equals(user.getStatus())){
                 throw exceptions.handleCreateBadRequest("User has already been deactivated.");
             }
             user.setStatus(INACTIVE);

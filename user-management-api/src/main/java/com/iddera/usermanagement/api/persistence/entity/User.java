@@ -39,8 +39,7 @@ public class User extends BaseEntity {
     private UserType type;
     private LocalDateTime lastLoginDate;
     @Enumerated(EnumType.STRING)
-    @ColumnDefault("'ACTIVE'")
-    private EntityStatus status = EntityStatus.ACTIVE;
+    private EntityStatus status;
     @ManyToMany(fetch = EAGER)
     @JoinTable(
             name = "user_role",
