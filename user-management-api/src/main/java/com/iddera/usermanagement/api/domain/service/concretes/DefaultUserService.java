@@ -40,6 +40,7 @@ import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
+import static java.util.stream.Collectors.toList;
 
 
 @Service
@@ -188,6 +189,14 @@ public class DefaultUserService implements UserService, UserPasswordService {
                 userRepository.findByUsername(principal.getName())
                         .map(User::toModel)
                         .orElseThrow(() -> exceptions.handleCreateNotFoundException("User not found", principal.getName())));
+    }
+
+    @Override
+    public CompletableFuture<List<UserModel>> getByIds(List<Long> userIds) {
+        return supplyAsync(() ->
+                userRepository.findAllById(userIds)
+                        .stream().map(User::toModel)
+                        .collect(toList()));
     }
 
     @Override

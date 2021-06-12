@@ -53,6 +53,13 @@ public class UserController {
                 .thenApply(ResponseModel::new);
     }
 
+    @PostMapping("/searches")
+    @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class, responseContainer = "List")})
+    public CompletableFuture<ResponseModel> search(@Valid @RequestBody UserSearch userSearch) {
+        return userService.getByIds(userSearch.getIds())
+                .thenApply(ResponseModel::new);
+    }
+
     @PostMapping("/reset-password/initiate")
     @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
     public CompletableFuture<ResponseModel> initiateForgotPassword(@Valid @RequestBody EmailModel emailModel, Locale locale) {
