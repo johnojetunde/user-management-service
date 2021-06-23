@@ -30,6 +30,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -490,6 +491,19 @@ class DefaultUserServiceTest {
                 .hasCause(new UserManagementException("User iddera@iddera.com not found"))
                 .extracting(Throwable::getCause)
                 .hasFieldOrPropertyWithValue("code", BAD_REQUEST.value());
+    }
+
+    @Test
+    void getAllByIds() {
+        var ids = List.of(1L, 2L);
+        when(userRepository.findAllById(ids))
+                .thenReturn(List.of(user()));
+
+        var result = userService.getByIds(ids).join();
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(1);
+        verify(userRepository).findAllById(ids);
     }
 
     private Role role() {

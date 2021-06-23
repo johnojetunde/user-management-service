@@ -8,6 +8,7 @@ import com.iddera.usermanagement.lib.domain.model.UserModel;
 import com.iddera.usermanagement.lib.domain.model.UserType;
 import retrofit2.http.*;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface UserClient {
@@ -55,4 +56,8 @@ public interface UserClient {
 
     @GET("users/current")
     CompletableFuture<ResponseModel<UserModel>> getUserDetails(@Header("Authorization") String bearerToken);
+
+    @POST("users/searches")
+    CompletableFuture<ResponseModel<List<UserModel>>> getByIds(@Body UserSearch userSearch,
+                                                               @Header("Authorization") String bearerToken);
 }

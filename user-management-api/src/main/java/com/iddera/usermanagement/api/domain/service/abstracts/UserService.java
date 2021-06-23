@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
@@ -24,6 +25,8 @@ public interface UserService {
     CompletableFuture<UserModel> getByUserName(String username);
 
     CompletableFuture<UserModel> getUserDetails(Principal principal);
+
+    CompletableFuture<List<UserModel>> getByIds(List<Long> userIds);
 
     CompletableFuture<UserModel> verifyUser(UserVerificationRequest userVerificationRequest);
 }

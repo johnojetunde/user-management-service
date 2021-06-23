@@ -12,6 +12,7 @@ import com.iddera.usermanagement.lib.domain.model.UserType;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static java.util.Base64.getEncoder;
@@ -88,6 +89,13 @@ public class Users {
                                                                     @NonNull String token) {
         String bearerToken = bearerToken(token);
         return userClient.getAll(pageNumber, pageSize, userType, bearerToken)
+                .handleAsync(ErrorHandler::handleException);
+    }
+
+    public CompletableFuture<ResponseModel<List<UserModel>>> getByIds(@NonNull UserSearch userSearch,
+                                                                      @NonNull String token) {
+        String bearerToken = bearerToken(token);
+        return userClient.getByIds(userSearch, bearerToken)
                 .handleAsync(ErrorHandler::handleException);
     }
 
