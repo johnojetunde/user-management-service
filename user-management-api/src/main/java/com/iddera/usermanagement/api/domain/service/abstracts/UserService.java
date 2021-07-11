@@ -29,4 +29,6 @@ public interface UserService {
     CompletableFuture<List<UserModel>> getByIds(List<Long> userIds);
 
     CompletableFuture<UserModel> verifyUser(UserVerificationRequest userVerificationRequest);
+
+    CompletableFuture<UserModel> deactivate(Long userId);
 }

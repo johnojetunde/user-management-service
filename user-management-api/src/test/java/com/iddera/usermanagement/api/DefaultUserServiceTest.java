@@ -46,6 +46,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static com.iddera.usermanagement.lib.domain.model.EntityStatus.ACTIVE;
+import static com.iddera.usermanagement.lib.domain.model.EntityStatus.INACTIVE;
 
 class DefaultUserServiceTest {
     @Mock
@@ -494,6 +496,50 @@ class DefaultUserServiceTest {
     }
 
     @Test
+    void deactivateUserFails_WhenUserDoesNotExist(){
+        User user = user();
+        user.setId(2L);
+        when(userRepository.findById(any(Long.class)))
+                .thenReturn(findById(List.of(user)));
+
+        var result = userService.deactivate(user.getId());
+        assertThatThrownBy(result::join)
+                .isInstanceOf(CompletionException.class)
+                .hasCause(new UserManagementException("User does not exist"))
+                .extracting(Throwable::getCause)
+                .hasFieldOrPropertyWithValue("code", BAD_REQUEST.value());
+    }
+
+    @Test
+    void deactivateUserFails_WhenUserIsAlreadyDeactivated(){
+        User user = user();
+        user.setStatus(INACTIVE);
+        when(userRepository.findById(any(Long.class)))
+                .thenReturn(Optional.of(user));
+
+        var result = userService.deactivate(user.getId());
+
+        assertThatThrownBy(result::join)
+                .isInstanceOf(CompletionException.class)
+                .hasCause(new UserManagementException("User has already been deactivated."))
+                .extracting(Throwable::getCause)
+                .hasFieldOrPropertyWithValue("code", BAD_REQUEST.value());
+    }
+
+    @Test
+    void deactivateUser_Successfully(){
+        when(userRepository.findById(any(Long.class)))
+                .thenReturn(Optional.of(user()));
+        when(userRepository.save(any()))
+                .thenReturn(user());
+        when(emailService.sendEmailToOneAddress(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(true);
+
+        var result = userService.deactivate(user().getId()).join();
+        assertUserValues(result);
+    }
+
+    @Test
     void getAllByIds() {
         var ids = List.of(1L, 2L);
         when(userRepository.findAllById(ids))
@@ -522,7 +568,8 @@ class DefaultUserServiceTest {
                 .setEmail("email@email.com")
                 .setType(UserType.ADMIN)
                 .setPassword("iddera")
-                .setRoles(singletonList(role()));
+                .setRoles(singletonList(role()))
+                .setStatus(ACTIVE);
         user.setId(1L);
         return user;
     }
@@ -592,5 +639,11 @@ class DefaultUserServiceTest {
                 .setActivationToken("123456789")
                 .setUsername("iddera@iddera.com")
                 .setId(1L);
+    }
+
+    private Optional<User> findById(List<User> users){
+        return users.stream()
+                .filter(user -> user.getId() == 1L)
+                .findFirst();
     }
 }

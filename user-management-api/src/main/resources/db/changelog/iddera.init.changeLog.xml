@@ -244,4 +244,11 @@
         </dropColumn>
     </changeSet>
 
+    <changeSet author="oakinrele" id="202105221744-01">
+        <addDefaultValue tableName="user" columnName="status" columnDataType="VARCHAR(255)" defaultValue="ACTIVE"/>
+    </changeSet>
+
+    <changeSet  author="oakinrele"  id="202105261355-01">
+        <modifyDataType columnName="status" newDataType="VARCHAR(10)" tableName="user"/>
+    </changeSet>
 </databaseChangeLog>

@@ -110,6 +110,26 @@ public class DefaultUserService implements UserService, UserPasswordService {
         }, executor);
     }
 
+    @Transactional
+    @Override
+    public CompletableFuture<UserModel> deactivate(Long userId){
+        return supplyAsync(() -> {
+            User user = getUser(userId, () -> exceptions.handleCreateBadRequest("User does not exist"));
+            if(INACTIVE.equals(user.getStatus())){
+                throw exceptions.handleCreateBadRequest("User has already been deactivated.");
+            }
+            user.setStatus(INACTIVE);
+            user  =  userRepository.save(user);
+
+            emailService.sendEmailToOneAddress(
+                    "Your account has been successfully deactivated.",
+                    "User Deactivated",
+                    user.getEmail(),
+                    "notification@iddera.com");
+            return  user.toModel();
+        }, executor);
+    }
+
     @Override
     public CompletableFuture<Page<UserModel>> getAll(UserType userType, Pageable pageable) {
         return supplyAsync(() ->

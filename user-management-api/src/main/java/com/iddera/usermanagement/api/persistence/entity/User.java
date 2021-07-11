@@ -8,6 +8,7 @@ import com.iddera.usermanagement.lib.domain.model.UserType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
@@ -37,6 +38,7 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private UserType type;
     private LocalDateTime lastLoginDate;
+    @Enumerated(EnumType.STRING)
     private EntityStatus status;
     @ManyToMany(fetch = EAGER)
     @JoinTable(
