@@ -1,6 +1,7 @@
 package com.iddera.usermanagement.lib.app.request;
 
 import com.iddera.commons.annotation.FieldMatch;
+import com.iddera.commons.annotation.ValidEnum;
 import com.iddera.usermanagement.lib.domain.model.UserType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,7 +9,6 @@ import lombok.experimental.Accessors;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @NoArgsConstructor
@@ -28,12 +28,12 @@ public class UserRequest {
     private String email;
     @NotBlank(message = "Username is required")
     private String username;
-    @NotNull
+    @ValidEnum(message = "UserType is required")
     private UserType type;
-    @NotBlank
+    @NotBlank(message = "Password is required")
     @Size(min = 6)
     private String password;
-    @NotBlank
+    @NotBlank(message = "Confirm Password is required")
     @Size(min = 6)
     private String confirmPassword;
     private Long roleId;

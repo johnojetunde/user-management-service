@@ -10,7 +10,7 @@ import javax.validation.constraints.NotBlank;
 @Accessors(chain = true)
 @Data
 public class UserVerificationRequest {
-    @NotBlank(message = "Firstname is required")
+    @NotBlank(message = "Token is required")
     private String token;
     @NotBlank(message = "Username is required")
     private String username;

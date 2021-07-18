@@ -12,7 +12,7 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 @Data
 public class EmailModel {
-    @Email
-    @NotBlank
+    @Email(message = "Email is invalid")
+    @NotBlank(message = "Email is required")
     private String email;
 }
