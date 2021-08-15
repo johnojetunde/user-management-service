@@ -3,6 +3,7 @@ package com.iddera.usermanagement.client.retrofits;
 import com.iddera.client.model.Page;
 import com.iddera.client.model.ResponseModel;
 import com.iddera.usermanagement.lib.app.request.*;
+import com.iddera.usermanagement.lib.app.response.EmailValidationResponse;
 import com.iddera.usermanagement.lib.domain.model.OauthToken;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
 import com.iddera.usermanagement.lib.domain.model.UserType;
@@ -60,4 +61,7 @@ public interface UserClient {
     @POST("users/searches")
     CompletableFuture<ResponseModel<List<UserModel>>> getByIds(@Body UserSearch userSearch,
                                                                @Header("Authorization") String bearerToken);
+
+    @POST("users/validate-email")
+    CompletableFuture<ResponseModel<EmailValidationResponse>> validateEmail(@Body EmailModel emailModel);
 }

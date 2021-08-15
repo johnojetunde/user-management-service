@@ -7,6 +7,7 @@ import com.iddera.usermanagement.api.app.model.UserResult;
 import com.iddera.usermanagement.api.domain.service.abstracts.UserPasswordService;
 import com.iddera.usermanagement.api.domain.service.abstracts.UserService;
 import com.iddera.usermanagement.lib.app.request.*;
+import com.iddera.usermanagement.lib.app.response.EmailValidationResponse;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
 import com.iddera.usermanagement.lib.domain.model.UserType;
 import io.swagger.annotations.ApiResponse;
@@ -35,6 +36,14 @@ public class UserController {
     @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
     public CompletableFuture<ResponseModel> create(@Valid @RequestBody UserRequest request, Locale locale) {
         return userService.create(request, locale)
+                .thenApply(ResponseModel::new);
+    }
+
+    @PostMapping("/validate-email")
+    @ApiResponses({@ApiResponse(code = 200, message = "Success", response = EmailValidationResponse.class)})
+    public CompletableFuture<ResponseModel> validateEmail(@Valid @RequestBody EmailModel request) {
+        return userService.isEmailExisting(request)
+                .thenApply(isExisting -> new EmailValidationResponse(isExisting, request.getEmail()))
                 .thenApply(ResponseModel::new);
     }
 
