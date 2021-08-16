@@ -552,7 +552,7 @@ class DefaultUserServiceTest {
     }
 
     @Test
-    void isEmailExisting_whenEmailIsExisting() {
+    void validateEmailExistence_whenEmailIsExisting() {
         var email = "email@email.com";
         when(userRepository.findByEmail(email))
                 .thenReturn(Optional.of(user()));
@@ -565,7 +565,7 @@ class DefaultUserServiceTest {
     }
 
     @Test
-    void isEmailExisting_whenEmailIsNotExisting() {
+    void validateEmailExistence_whenEmailIsNotExisting() {
         var email = "email@email.com";
         when(userRepository.findByEmail(email))
                 .thenReturn(Optional.empty());
