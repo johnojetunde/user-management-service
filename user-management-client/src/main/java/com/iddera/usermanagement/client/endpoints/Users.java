@@ -5,6 +5,7 @@ import com.iddera.client.model.ResponseModel;
 import com.iddera.client.util.ErrorHandler;
 import com.iddera.usermanagement.client.retrofits.UserClient;
 import com.iddera.usermanagement.lib.app.request.*;
+import com.iddera.usermanagement.lib.app.response.EmailValidationResponse;
 import com.iddera.usermanagement.lib.domain.model.LoginModel;
 import com.iddera.usermanagement.lib.domain.model.OauthToken;
 import com.iddera.usermanagement.lib.domain.model.UserModel;
@@ -42,6 +43,10 @@ public class Users {
         return userClient.refreshToken(basicHeaderAuth,
                 "refresh_token",
                 refreshToken);
+    }
+
+    public CompletableFuture<ResponseModel<EmailValidationResponse>> validateEmail(@NonNull EmailModel emailModel) {
+        return userClient.validateEmail(emailModel);
     }
 
     public CompletableFuture<ResponseModel<UserModel>> create(@NonNull UserRequest request) {

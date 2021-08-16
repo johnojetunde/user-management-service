@@ -1,4 +1,4 @@
-package com.iddera.usermanagement.api;
+package com.iddera.usermanagement.api.domain.service.concretes;
 
 
 import com.iddera.usermanagement.api.app.config.EmailConfiguration;
@@ -8,7 +8,6 @@ import com.iddera.usermanagement.api.domain.exception.UserManagementExceptionSer
 import com.iddera.usermanagement.api.domain.service.abstracts.EmailService;
 import com.iddera.usermanagement.api.domain.service.abstracts.MailContentBuilder;
 import com.iddera.usermanagement.api.domain.service.abstracts.TokenGenerationService;
-import com.iddera.usermanagement.api.domain.service.concretes.DefaultUserService;
 import com.iddera.usermanagement.api.persistence.entity.Role;
 import com.iddera.usermanagement.api.persistence.entity.User;
 import com.iddera.usermanagement.api.persistence.entity.UserActivationToken;
@@ -36,6 +35,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
+import static com.iddera.usermanagement.lib.domain.model.EntityStatus.ACTIVE;
+import static com.iddera.usermanagement.lib.domain.model.EntityStatus.INACTIVE;
 import static com.iddera.usermanagement.lib.domain.model.UserType.CLIENT;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.Executors.newFixedThreadPool;
@@ -46,8 +47,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static com.iddera.usermanagement.lib.domain.model.EntityStatus.ACTIVE;
-import static com.iddera.usermanagement.lib.domain.model.EntityStatus.INACTIVE;
 
 class DefaultUserServiceTest {
     @Mock
@@ -550,6 +549,32 @@ class DefaultUserServiceTest {
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getId()).isEqualTo(1);
         verify(userRepository).findAllById(ids);
+    }
+
+    @Test
+    void validateEmailExistence_whenEmailIsExisting() {
+        var email = "email@email.com";
+        when(userRepository.findByEmail(email))
+                .thenReturn(Optional.of(user()));
+
+        var emailModel = new EmailModel(email);
+        var result = userService.isEmailExisting(emailModel).join();
+
+        assertThat(result).isTrue();
+        verify(userRepository).findByEmail(email);
+    }
+
+    @Test
+    void validateEmailExistence_whenEmailIsNotExisting() {
+        var email = "email@email.com";
+        when(userRepository.findByEmail(email))
+                .thenReturn(Optional.empty());
+
+        var emailModel = new EmailModel(email);
+        var result = userService.isEmailExisting(emailModel).join();
+
+        assertThat(result).isFalse();
+        verify(userRepository).findByEmail(email);
     }
 
     private Role role() {

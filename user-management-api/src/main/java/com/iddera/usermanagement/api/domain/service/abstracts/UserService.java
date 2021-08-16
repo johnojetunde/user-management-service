@@ -1,5 +1,6 @@
 package com.iddera.usermanagement.api.domain.service.abstracts;
 
+import com.iddera.usermanagement.lib.app.request.EmailModel;
 import com.iddera.usermanagement.lib.app.request.UserRequest;
 import com.iddera.usermanagement.lib.app.request.UserUpdateRequest;
 import com.iddera.usermanagement.lib.app.request.UserVerificationRequest;
@@ -29,6 +30,8 @@ public interface UserService {
     CompletableFuture<List<UserModel>> getByIds(List<Long> userIds);
 
     CompletableFuture<UserModel> verifyUser(UserVerificationRequest userVerificationRequest);
+
+    CompletableFuture<Boolean> isEmailExisting(EmailModel request);
 
     CompletableFuture<UserModel> deactivate(Long userId);
 }
