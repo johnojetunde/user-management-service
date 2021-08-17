@@ -339,7 +339,7 @@ public class DefaultUserService implements UserService, UserPasswordService {
     }
 
     private String createActivationTokenForUser(String username) {
-        var token = tokenGenerationService.generateToken();
+        var token = tokenGenerationService.generateToken(username);
         UserActivationToken userActivationToken = new UserActivationToken();
         userActivationToken.setUsername(username);
         userActivationToken.setActivationToken(token);
@@ -349,7 +349,7 @@ public class DefaultUserService implements UserService, UserPasswordService {
     }
 
     private String createForgotTokenForUser(String username) {
-        var token = tokenGenerationService.generateToken();
+        var token = tokenGenerationService.generateToken(username);
         UserForgotPasswordToken forgotPasswordToken = new UserForgotPasswordToken();
         forgotPasswordToken.setUsername(username);
         forgotPasswordToken.setActivationToken(token);

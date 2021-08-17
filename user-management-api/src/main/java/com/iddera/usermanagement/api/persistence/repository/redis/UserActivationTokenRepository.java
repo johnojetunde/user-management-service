@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface UserActivationTokenRepository extends CrudRepository<UserActivationToken, Long> {
     Optional<UserActivationToken> findByActivationToken(String token);
+    boolean existsByActivationToken(String token);
+    void deleteByUsername(String username);
 }
