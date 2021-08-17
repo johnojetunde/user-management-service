@@ -1,5 +1,6 @@
 package com.iddera.usermanagement.api.domain.service.concretes;
 
+import com.iddera.usermanagement.api.domain.exception.UserManagementException;
 import com.iddera.usermanagement.api.domain.service.abstracts.TokenGenerationService;
 import com.iddera.usermanagement.api.persistence.repository.UserRepository;
 import com.iddera.usermanagement.api.persistence.repository.redis.UserActivationTokenRepository;
@@ -49,7 +50,7 @@ public class DefaultTokenGenerationService implements TokenGenerationService {
             tryCount++;
         }
         return validToken.orElseThrow(() ->
-                new UsernameNotFoundException("Maximum token generation retry exceeded, please contact administrator."));
+                new UserManagementException("Maximum token generation retry exceeded, please contact administrator."));
     }
 
     private String generateToken(int tokenLength, int bound){
