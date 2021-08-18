@@ -2,6 +2,7 @@ package com.iddera.usermanagement.api.domain.service.concretes;
 
 import com.iddera.usermanagement.api.domain.exception.UserManagementException;
 import com.iddera.usermanagement.api.domain.service.abstracts.TokenGenerationService;
+import com.iddera.usermanagement.api.persistence.repository.RoleRepository;
 import com.iddera.usermanagement.api.persistence.repository.UserRepository;
 import com.iddera.usermanagement.api.persistence.repository.redis.UserActivationTokenRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import static java.lang.String.format;
 public class DefaultTokenGenerationService implements TokenGenerationService {
     private static final Integer TOKEN_LENGTH = 6;
     private static final Integer TOKEN_BOUND = 9;
+
     private final UserActivationTokenRepository userActivationTokenRepository;
     private final UserRepository userRepository;
 
@@ -36,19 +38,18 @@ public class DefaultTokenGenerationService implements TokenGenerationService {
 
     private String generateToken(){
         int tryCount = 0;
-        boolean tokenValid = false;
-        boolean maxRetryExhausted = false;
         Optional<String> validToken = Optional.empty();
 
-        while(!tokenValid && !maxRetryExhausted){
+        while(tryCount < maxRetryCount){
             String generatedToken = generateToken(TOKEN_LENGTH,TOKEN_BOUND);
-            tokenValid = !tokenExists(generatedToken);
-            maxRetryExhausted = tryCount > maxRetryCount;
-            if(tokenValid){
-                validToken = Optional.of(generatedToken);
+            if(tokenExists(generatedToken)){
+                tryCount++;
+                continue;
             }
-            tryCount++;
+            validToken = Optional.of(generatedToken);
+            break;
         }
+
         return validToken.orElseThrow(() ->
                 new UserManagementException("Maximum token generation retry exceeded, please contact administrator."));
     }
