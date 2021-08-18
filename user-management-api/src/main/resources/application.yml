@@ -43,8 +43,6 @@ iddera:
     read-time-out: ${CLIENT_READ_TIMEOUT:40}
     write-time-out: ${CLIENT_WRITE_TIMEOUT:40}
     connection-time-out: ${CLIENT_CONNECTION_TIMEOUT:300}
-
-iderra:
   email:
     user-activation-url: ${USER_ACTIVATION_URL:http://localhost:8080/users/verify-email}
     user-forgot-password-url: ${USER_FORGOT_PASSWORD_URL:http://localhost:8080/users/reset-password}

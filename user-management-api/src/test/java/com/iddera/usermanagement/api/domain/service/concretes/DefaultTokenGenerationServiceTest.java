@@ -27,7 +27,7 @@ class DefaultTokenGenerationServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        tokenGenerationService = new DefaultTokenGenerationService(userActivationTokenRepository,userRepository);
+        tokenGenerationService = new DefaultTokenGenerationService(userActivationTokenRepository,userRepository,5);
     }
 
     @Test
@@ -42,8 +42,6 @@ class DefaultTokenGenerationServiceTest {
                 .thenReturn(true);
         when(userActivationTokenRepository.existsByActivationToken(anyString()))
                 .thenReturn(true);
-
-        ReflectionTestUtils.setField(tokenGenerationService,"maxRetryCount",5);
         assertThatExceptionOfType(UserManagementException.class)
                 .isThrownBy(() -> tokenGenerationService.generateToken(anyString()))
                 .withMessage("Maximum token generation retry exceeded, please contact administrator.");
@@ -56,7 +54,6 @@ class DefaultTokenGenerationServiceTest {
         when(userActivationTokenRepository.existsByActivationToken(anyString()))
                 .thenReturn(false);
 
-        ReflectionTestUtils.setField(tokenGenerationService,"maxRetryCount",10);
         String token = tokenGenerationService.generateToken(anyString());
         assertEquals(token.length(), 6);
     }

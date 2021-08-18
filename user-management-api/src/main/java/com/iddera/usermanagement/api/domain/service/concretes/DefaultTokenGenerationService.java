@@ -17,7 +17,6 @@ import java.util.Random;
 import static java.lang.String.format;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class DefaultTokenGenerationService implements TokenGenerationService {
     private static final Integer TOKEN_LENGTH = 6;
@@ -25,12 +24,18 @@ public class DefaultTokenGenerationService implements TokenGenerationService {
 
     private final UserActivationTokenRepository userActivationTokenRepository;
     private final UserRepository userRepository;
+    private final Integer maxRetryCount;
 
-    @Value("${max.token.generation.retry.count:10}")
-    private int maxRetryCount;
+    public DefaultTokenGenerationService(UserActivationTokenRepository userActivationTokenRepository, UserRepository userRepository
+            ,@Value("${max.token-generation-retry.count:10}") Integer maxRetryCount){
+        this.userActivationTokenRepository = userActivationTokenRepository;
+        this.userRepository = userRepository;
+        this.maxRetryCount = maxRetryCount;
+
+    }
 
     @Override
-    public String generateToken(String username) {
+    public synchronized String generateToken(String username) {
         validateUserExists(username);
         deleteOldTokenIfExists(username);
         return generateToken();
