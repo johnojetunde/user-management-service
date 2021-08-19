@@ -7,6 +7,7 @@ import lombok.experimental.Accessors;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
 
+import javax.persistence.Column;
 import javax.persistence.Id;
 import java.io.Serializable;
 
@@ -23,5 +24,6 @@ public class UserActivationToken implements Serializable {
     private String username;
 
     @Indexed
+    @Column(unique = true)
     private String activationToken;
 }
