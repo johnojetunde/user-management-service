@@ -1,14 +1,12 @@
 package com.iddera.usermanagement.api.domain.service.concretes;
 
 import com.iddera.usermanagement.api.domain.exception.UserManagementException;
+import com.iddera.usermanagement.api.domain.exception.UserManagementExceptionService;
 import com.iddera.usermanagement.api.domain.service.abstracts.TokenGenerationService;
-import com.iddera.usermanagement.api.persistence.repository.RoleRepository;
 import com.iddera.usermanagement.api.persistence.repository.UserRepository;
 import com.iddera.usermanagement.api.persistence.repository.redis.UserActivationTokenRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -25,12 +23,14 @@ public class DefaultTokenGenerationService implements TokenGenerationService {
     private final UserActivationTokenRepository userActivationTokenRepository;
     private final UserRepository userRepository;
     private final Integer maxRetryCount;
+    private final UserManagementExceptionService exceptions;
 
     public DefaultTokenGenerationService(UserActivationTokenRepository userActivationTokenRepository, UserRepository userRepository
-            ,@Value("${max.token-generation-retry.count:10}") Integer maxRetryCount){
+            ,@Value("${max.token-generation-retry.count:10}") Integer maxRetryCount, UserManagementExceptionService exceptionService){
         this.userActivationTokenRepository = userActivationTokenRepository;
         this.userRepository = userRepository;
         this.maxRetryCount = maxRetryCount;
+        this.exceptions = exceptionService;
 
     }
 
@@ -75,10 +75,11 @@ public class DefaultTokenGenerationService implements TokenGenerationService {
     private void deleteOldTokenIfExists(String username) {
         userActivationTokenRepository.deleteByUsername(username);
     }
+
     private void validateUserExists(String username){
         boolean userExists = userRepository.existsByUsername(username);
         if(!userExists){
-            throw new UsernameNotFoundException(format("User with name: %s does not exist.",username));
+            throw exceptions.handleCreateBadRequest(format("User with name: %s does not exist.",username));
         }
     }
 }
