@@ -156,8 +156,10 @@ class DefaultUserServiceTest {
                     entity.setId(1L);
                     return entity;
                 });
-        when(tokenGenerationService.generateToken())
+        when(tokenGenerationService.generateToken(anyString()))
                 .thenReturn("123456789");
+        when(userActivationTokenRepository.existsByActivationToken(anyString()))
+                .thenReturn(false);
         when(userActivationTokenRepository.save(any()))
                 .thenReturn(buildUserActivationToken());
 
@@ -407,7 +409,7 @@ class DefaultUserServiceTest {
         Locale locale = new Locale("en");
         when(userRepository.findByEmail(eq("iddera@iddera.com")))
                 .thenReturn(Optional.of(user()));
-        when(tokenGenerationService.generateToken())
+        when(tokenGenerationService.generateToken(anyString()))
                 .thenReturn("123456789");
         when(userForgotPasswordTokenRepository.save(any()))
                 .thenReturn(buildUserForgottenPassword());
@@ -421,7 +423,7 @@ class DefaultUserServiceTest {
 
         assertUserValues(result);
         verify(userRepository).findByEmail("iddera@iddera.com");
-        verify(tokenGenerationService).generateToken();
+        verify(tokenGenerationService).generateToken(anyString());
         verify(userForgotPasswordTokenRepository).save(any());
         verify(mailContentBuilder).generateMailContent(anyMap(), eq(Constants.WELCOME_TEMPLATE), eq(locale));
     }
