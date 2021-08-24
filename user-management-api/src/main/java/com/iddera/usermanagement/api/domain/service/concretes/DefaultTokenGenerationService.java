@@ -70,8 +70,7 @@ public class DefaultTokenGenerationService implements TokenGenerationService {
     }
 
     private boolean tokenExists(String token){
-        Optional<UserActivationToken> userActivationToken = userActivationTokenRepository.findByActivationToken(token);
-        return userActivationToken.isPresent();
+        return Optional.ofNullable(userActivationTokenRepository.findByActivationToken(token)).isPresent();
     }
 
     private void deleteOldTokenIfExists(String username) {

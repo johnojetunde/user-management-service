@@ -4,12 +4,15 @@ package com.iddera.usermanagement.api.domain.service.concretes;
 import com.iddera.usermanagement.api.domain.exception.UserManagementException;
 import com.iddera.usermanagement.api.domain.exception.UserManagementExceptionService;
 import com.iddera.usermanagement.api.domain.service.abstracts.TokenGenerationService;
+import com.iddera.usermanagement.api.persistence.entity.UserActivationToken;
 import com.iddera.usermanagement.api.persistence.repository.UserRepository;
 import com.iddera.usermanagement.api.persistence.repository.redis.UserActivationTokenRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -44,8 +47,8 @@ class DefaultTokenGenerationServiceTest {
     void tokenGenerationFails_whenMaxRetryCountExceeded() {
         when(userRepository.existsByUsername(anyString()))
                 .thenReturn(true);
-        when(userActivationTokenRepository.existsByActivationToken(anyString()))
-                .thenReturn(true);
+        when(userActivationTokenRepository.findByActivationToken(anyString()))
+                .thenReturn(Optional.of(buildUserActivationToken()));
         assertThatExceptionOfType(UserManagementException.class)
                 .isThrownBy(() -> tokenGenerationService.generateToken(anyString()))
                 .withMessage("Maximum token generation retry exceeded, please contact administrator.");
@@ -55,10 +58,17 @@ class DefaultTokenGenerationServiceTest {
     void tokenGenerates_successfully() {
         when(userRepository.existsByUsername(anyString()))
                 .thenReturn(true);
-        when(userActivationTokenRepository.existsByActivationToken(anyString()))
-                .thenReturn(false);
+        when(userActivationTokenRepository.findByActivationToken(anyString()))
+                .thenReturn(null);
 
         String token = tokenGenerationService.generateToken(anyString());
         assertEquals(token.length(), 6);
+    }
+
+    private UserActivationToken buildUserActivationToken() {
+        return new UserActivationToken()
+                .setActivationToken("123456789")
+                .setUsername("iddera@iddera.com")
+                .setId(1L);
     }
 }
