@@ -59,7 +59,7 @@ class DefaultTokenGenerationServiceTest {
         when(userRepository.existsByUsername(anyString()))
                 .thenReturn(true);
         when(userActivationTokenRepository.findByActivationToken(anyString()))
-                .thenReturn(null);
+                .thenReturn(Optional.empty());
 
         String token = tokenGenerationService.generateToken(anyString());
         assertEquals(token.length(), 6);

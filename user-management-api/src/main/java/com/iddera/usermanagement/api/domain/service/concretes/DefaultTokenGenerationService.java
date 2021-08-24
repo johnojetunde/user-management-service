@@ -57,7 +57,7 @@ public class DefaultTokenGenerationService implements TokenGenerationService {
         }
 
         return validToken.orElseThrow(() ->
-                new UserManagementException("Maximum token generation retry exceeded, please contact administrator."));
+                exceptions.handleCreateBadRequest("Maximum token generation retry exceeded, please contact administrator."));
     }
 
     private String generateToken(int tokenLength, int bound){
@@ -70,7 +70,8 @@ public class DefaultTokenGenerationService implements TokenGenerationService {
     }
 
     private boolean tokenExists(String token){
-        return Optional.ofNullable(userActivationTokenRepository.findByActivationToken(token)).isPresent();
+        Optional<UserActivationToken> userActivationToken = userActivationTokenRepository.findByActivationToken(token);
+        return userActivationToken.isPresent();
     }
 
     private void deleteOldTokenIfExists(String username) {

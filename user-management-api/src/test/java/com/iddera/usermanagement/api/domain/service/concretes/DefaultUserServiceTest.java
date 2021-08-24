@@ -28,6 +28,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
@@ -159,7 +160,7 @@ class DefaultUserServiceTest {
         when(tokenGenerationService.generateToken(anyString()))
                 .thenReturn("123456789");
         when(userActivationTokenRepository.findByActivationToken(anyString()))
-                .thenReturn(null);
+                .thenReturn(Optional.empty());
         when(userActivationTokenRepository.save(any()))
                 .thenReturn(buildUserActivationToken());
 
