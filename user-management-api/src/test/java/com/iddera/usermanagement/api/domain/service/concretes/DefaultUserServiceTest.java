@@ -158,8 +158,8 @@ class DefaultUserServiceTest {
                 });
         when(tokenGenerationService.generateToken(anyString()))
                 .thenReturn("123456789");
-        when(userActivationTokenRepository.existsByActivationToken(anyString()))
-                .thenReturn(false);
+        when(userActivationTokenRepository.findByActivationToken(anyString()))
+                .thenReturn(null);
         when(userActivationTokenRepository.save(any()))
                 .thenReturn(buildUserActivationToken());
 
