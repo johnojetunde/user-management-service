@@ -83,7 +83,7 @@ public class DefaultUserService implements UserService, UserPasswordService {
         this.emailConfiguration = emailConfiguration;
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public CompletableFuture<UserModel> create(UserRequest request, Locale locale) {
         return createEntity(request, locale).thenApply(User::toModel);
