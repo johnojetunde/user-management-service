@@ -3,6 +3,7 @@ package com.iddera.usermanagement.api.domain.service.concretes;
 import com.iddera.usermanagement.api.domain.exception.UserManagementException;
 import com.iddera.usermanagement.api.domain.exception.UserManagementExceptionService;
 import com.iddera.usermanagement.api.domain.service.abstracts.TokenGenerationService;
+import com.iddera.usermanagement.api.persistence.entity.UserActivationToken;
 import com.iddera.usermanagement.api.persistence.repository.UserRepository;
 import com.iddera.usermanagement.api.persistence.repository.redis.UserActivationTokenRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -73,7 +74,8 @@ public class DefaultTokenGenerationService implements TokenGenerationService {
     }
 
     private void deleteOldTokenIfExists(String username) {
-        userActivationTokenRepository.deleteByUsername(username);
+        Optional<UserActivationToken> userActivationToken = userActivationTokenRepository.findByUsername(username);
+        userActivationToken.ifPresent(userActivationTokenRepository::delete);
     }
 
     private void validateUserExists(String username){
