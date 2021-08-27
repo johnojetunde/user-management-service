@@ -12,6 +12,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class ThymeLeafMailContentBuilder implements MailContentBuilder {
+
     private final TemplateEngine templateEngine;
 
     @Override

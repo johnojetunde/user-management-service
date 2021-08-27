@@ -64,4 +64,8 @@ public interface UserClient {
 
     @POST("users/validate-email")
     CompletableFuture<ResponseModel<EmailValidationResponse>> validateEmail(@Body EmailModel emailModel);
+
+    @PUT("users/pin")
+    CompletableFuture<ResponseModel<String>> createOrUpdatePIN(@Body PinUpdate pinUpdate,
+                                                               @Header("Authorization") String bearerToken);
 }
