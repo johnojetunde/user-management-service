@@ -4,6 +4,7 @@ package com.iddera.usermanagement.api.app.controller;
 import com.iddera.commons.annotation.ValidEnum;
 import com.iddera.usermanagement.api.app.model.ResponseModel;
 import com.iddera.usermanagement.api.app.model.UserResult;
+import com.iddera.usermanagement.api.domain.service.abstracts.PinService;
 import com.iddera.usermanagement.api.domain.service.abstracts.UserPasswordService;
 import com.iddera.usermanagement.api.domain.service.abstracts.UserService;
 import com.iddera.usermanagement.lib.app.request.*;
@@ -31,6 +32,7 @@ public class UserController {
 
     private final UserService userService;
     private final UserPasswordService userPasswordService;
+    private final PinService pinService;
 
     @PostMapping(consumes = APPLICATION_JSON_VALUE)
     @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
@@ -109,6 +111,14 @@ public class UserController {
     @ApiResponses({@ApiResponse(code = 200, message = "Success", response = UserModel.class)})
     public CompletableFuture<ResponseModel> verifyEmail(@Valid @RequestBody UserVerificationRequest userVerificationRequest) {
         return userService.verifyUser(userVerificationRequest)
+                .thenApply(ResponseModel::new);
+    }
+
+    @PutMapping("/pin")
+    @ApiResponses({@ApiResponse(code = 200, message = "Success", response = String.class)})
+    public CompletableFuture<ResponseModel> createOrUpdatePin(@Valid @RequestBody PinUpdate pinRequest,
+                                                              Principal principal) {
+        return pinService.createOrUpdatePin(pinRequest, principal.getName())
                 .thenApply(ResponseModel::new);
     }
 

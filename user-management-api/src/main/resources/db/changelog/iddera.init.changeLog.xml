@@ -162,7 +162,7 @@
     </changeSet>
     <changeSet author="tajia" id="202009122308-03">
         <addColumn tableName="user">
-            <column name="status" type="VARCHAR(255)"></column>
+            <column name="status" type="VARCHAR(255)"/>
         </addColumn>
     </changeSet>
 
@@ -248,7 +248,12 @@
         <addDefaultValue tableName="user" columnName="status" columnDataType="VARCHAR(255)" defaultValue="ACTIVE"/>
     </changeSet>
 
-    <changeSet  author="oakinrele"  id="202105261355-01">
+    <changeSet author="oakinrele" id="202105261355-01">
         <modifyDataType columnName="status" newDataType="VARCHAR(10)" tableName="user"/>
+    </changeSet>
+    <changeSet author="johnojetunde" id="202108271137-01">
+        <addColumn tableName="user">
+            <column name="pin" type="VARCHAR(10)"/>
+        </addColumn>
     </changeSet>
 </databaseChangeLog>

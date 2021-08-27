@@ -8,7 +8,6 @@ import com.iddera.usermanagement.lib.domain.model.UserType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
@@ -16,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.iddera.commons.utils.FunctionUtil.emptyIfNullStream;
 import static java.util.stream.Collectors.toSet;
 import static javax.persistence.FetchType.EAGER;
@@ -35,6 +35,7 @@ public class User extends BaseEntity {
     @Column(unique = true)
     private String username;
     private String password;
+    private String pin;
     @Enumerated(EnumType.STRING)
     private UserType type;
     private LocalDateTime lastLoginDate;
@@ -71,5 +72,9 @@ public class User extends BaseEntity {
         return emptyIfNullStream(getRoles())
                 .map(Role::toModel)
                 .collect(toSet());
+    }
+
+    public boolean isPinSet() {
+        return !isNullOrEmpty(pin);
     }
 }

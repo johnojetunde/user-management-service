@@ -58,7 +58,6 @@ public class DefaultUserService implements UserService, UserPasswordService {
     private final MailContentBuilder mailContentBuilder;
     private final EmailConfiguration emailConfiguration;
 
-
     public DefaultUserService(UserRepository userRepository,
                               RoleRepository roleRepository,
                               @Qualifier("asyncExecutor") Executor executor,
