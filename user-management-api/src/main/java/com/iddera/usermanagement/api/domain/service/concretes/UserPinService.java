@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static com.iddera.usermanagement.lib.domain.utils.FunctionUtil.emptyIfNullStream;
+import static com.iddera.commons.utils.FunctionUtil.emptyIfNullStream;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 @RequiredArgsConstructor

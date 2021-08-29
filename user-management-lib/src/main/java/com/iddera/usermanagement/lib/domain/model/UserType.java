@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import java.util.stream.Stream;
 
-import static com.iddera.usermanagement.lib.domain.utils.FunctionUtil.isNullOrEmpty;
+import static com.iddera.commons.utils.FunctionUtil.isNullOrEmpty;
+
 
 public enum UserType {
     DOCTOR,
