@@ -1,6 +1,7 @@
-package com.iddera.usermanagement.api.app.config;
+package com.iddera.usermanagement.api.app.config.security;
 
 import org.springframework.beans.factory.annotation.Value;
+
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 

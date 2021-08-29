@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @AllArgsConstructor
@@ -21,10 +22,12 @@ import javax.validation.constraints.Size;
 public class PinUpdate {
     private String password;
     private String currentPin;
-    @NotBlank
+    @NotNull(message = "New PIN is required")
+    @NotBlank(message = "New PIN is required")
     @Size(min = 4, max = 4)
     private String newPin;
-    @NotBlank
+    @NotNull(message = "Confirm New PIN is required")
+    @NotBlank(message = "Confirm New PIN is required")
     @Size(min = 4, max = 4)
     private String confirmNewPin;
 }

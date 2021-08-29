@@ -19,7 +19,9 @@ public class IdderaConcurrentSessions implements SessionAuthenticationStrategy {
     private final String resourceId;
 
     @Override
-    public void onAuthentication(Authentication authentication, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws SessionAuthenticationException {
+    public void onAuthentication(Authentication authentication,
+                                 HttpServletRequest httpServletRequest,
+                                 HttpServletResponse httpServletResponse) throws SessionAuthenticationException {
         UserDetails userDetailsAdaptor = (UserDetails) authentication.getPrincipal();
         Collection<OAuth2AccessToken> accessTokens = tokenStore.findTokensByClientIdAndUserName(this.resourceId, userDetailsAdaptor.getUsername());
         if (accessTokens != null && !accessTokens.isEmpty()) {

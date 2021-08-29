@@ -256,4 +256,7 @@
             <column name="pin" type="VARCHAR(10)"/>
         </addColumn>
     </changeSet>
+    <changeSet author="johnojetunde" id="202108291655-01">
+        <modifyDataType columnName="pin" newDataType="${text}" tableName="user"/>
+    </changeSet>
 </databaseChangeLog>

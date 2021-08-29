@@ -1,6 +1,5 @@
-package com.iddera.usermanagement.api.app.config;
+package com.iddera.usermanagement.api.app.config.security;
 
-import com.iddera.usermanagement.api.app.config.security.IdderaConcurrentSessions;
 import com.iddera.usermanagement.api.persistence.entity.UserActivationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +12,8 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -43,17 +44,27 @@ import javax.servlet.http.HttpSessionListener;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Value("${security.signing-key}")
-    private String signingKey;
+    private final String signingKey;
+    private final String securityRealm;
+    private final String resourceId;
+    private final RedisConnectionFactory redisConnectionFactory;
+    private final IdderaUserDetailsPasswordService userDetailsPasswordService;
+    private final IdderaUserDetailsPINService userDetailsPINService;
 
-    @Value("${security.security-realm}")
-    private String securityRealm;
 
-    @Value("${resource.id}")
-    private String resourceId;
-
-    @Autowired
-    private RedisConnectionFactory redisConnectionFactory;
+    public SecurityConfig(@Value("${security.signing-key}") String signingKey,
+                          @Value("${security.security-realm}") String securityRealm,
+                          @Value("${resource.id}") String resourceId,
+                          RedisConnectionFactory redisConnectionFactory,
+                          IdderaUserDetailsPasswordService userDetailsPasswordService,
+                          IdderaUserDetailsPINService userDetailsPINService) {
+        this.signingKey = signingKey;
+        this.securityRealm = securityRealm;
+        this.resourceId = resourceId;
+        this.redisConnectionFactory = redisConnectionFactory;
+        this.userDetailsPasswordService = userDetailsPasswordService;
+        this.userDetailsPINService = userDetailsPINService;
+    }
 
     @Bean
     public PasswordEncoder encoder() {
@@ -80,6 +91,28 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected AuthenticationManager authenticationManager() throws Exception {
         return super.authenticationManager();
+    }
+
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(passwordAuthenticationProvider());
+        auth.authenticationProvider(pinAuthenticationProvider());
+    }
+
+    @Bean
+    public DaoAuthenticationProvider passwordAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(encoder());
+        provider.setUserDetailsService(userDetailsPasswordService);
+        return provider;
+    }
+
+    @Bean
+    public DaoAuthenticationProvider pinAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(encoder());
+        provider.setUserDetailsService(userDetailsPINService);
+        return provider;
     }
 
     @Bean
